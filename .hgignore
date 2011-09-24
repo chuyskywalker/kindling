@@ -2,3 +2,4 @@ syntax: glob
 trialsd/*
 .idea/*
 trialsd.zip
+config.php
