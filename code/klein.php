@@ -467,6 +467,16 @@ class _Response extends StdClass {
         }
     }
 
+    // fetch unknown variables. mostly used for rendered views
+	public function __get($name) {
+		if (isset($this->_viewvars[$name])) {
+			return $this->_viewvars[$name];
+		}
+		else {
+			return null;
+		}
+	}
+
     //Adds to or modifies the current query string
     public function query($new, $value = null) {
         $query = array();
