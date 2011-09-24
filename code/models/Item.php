@@ -3,9 +3,14 @@
 abstract class Item {
 
     const REDIS_PREFIX = 'item';
+    const TYPE = false;
 
-    abstract public function getType();
+    public function getType() {
+        return static::TYPE;
+    }
 
-    abstract public function save();
+    public function save($id, $values) {
+
+    }
 
 }
