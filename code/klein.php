@@ -2,20 +2,51 @@
 # (c) Chris O'Hara <cohara87@gmail.com> (MIT License)
 # http://github.com/chriso/klein.php
 
+# Globals?!?? D:
 $__routes = array();
+$__namespace = null;
 
 //Add a route callback
-function respond($method, $route, $callback = null) {
-    global $__routes;
-    $__routes[] = array($method, $route, $callback);
+function respond($method, $route = '*', $callback = null) {
+    global $__routes, $__namespace;
+    $count_match = true;
+    if (is_callable($method)) {
+        $callback = $method;
+        $method = $route = null;
+        $count_match = false;
+    } elseif (is_callable($route)) {
+        $callback = $route;
+        $route = $method;
+        $method = null;
+    }
+    $__routes[] = array($method, $__namespace . $route, $callback, $count_match);
     return $callback;
+}
+
+//Each route defined inside $routes will be in the $namespace
+function with($namespace, $routes) {
+    global $__namespace;
+    $previous = $__namespace;
+    $__namespace .= $namespace;
+    if (is_callable($routes)) {
+        $routes();
+    } else {
+        require_once $routes;
+    }
+    $__namespace = $previous;
+}
+
+function startSession() {
+    if (session_id() === '') {
+        session_start();
+    }
 }
 
 //Dispatch the request to the approriate route(s)
 function dispatch($uri = null, $req_method = null, array $params = null, $capture = false) {
     global $__routes;
 
-    //Pass three parameters to each callback, $request, $response, and a blank object for sharing scope
+    //Pass $request, $response, and a blank object for sharing scope through each callback
     $request  = new _Request;
     $response = new _Response;
     $app      = new StdClass;
@@ -38,19 +69,16 @@ function dispatch($uri = null, $req_method = null, array $params = null, $captur
         $_REQUEST = array_merge($_REQUEST, $params);
     }
 
-    $matched = false;
+    $matched = 0;
     $apc = function_exists('apc_fetch');
 
     ob_start();
 
     foreach ($__routes as $handler) {
-        list($method, $_route, $callback) = $handler;
+        list($method, $_route, $callback, $count_match) = $handler;
 
         //Was a method specified? If so, check it against the current request method
-        if (is_callable($_route)) {
-            $callback = $_route;
-            $_route = $method;
-        } elseif (is_array($method)) {
+        if (is_array($method)) {
             $method_match = false;
             foreach ($method as $test) {
                 if (strcasecmp($req_method, $test) === 0) {
@@ -61,12 +89,12 @@ function dispatch($uri = null, $req_method = null, array $params = null, $captur
             if (false === $method_match) {
                 continue;
             }
-        } elseif (strcasecmp($req_method, $method) !== 0) {
+        } elseif (null !== $method && strcasecmp($req_method, $method) !== 0) {
             continue;
         }
 
         //! is used to negate a match
-        if ($_route[0] === '!') {
+        if (isset($_route[0]) && $_route[0] === '!') {
             $negate = true;
             $i = 1;
         } else {
@@ -75,11 +103,16 @@ function dispatch($uri = null, $req_method = null, array $params = null, $captur
         }
 
         //Check for a wildcard (match all)
-        if ($_route === '*') {
+        if ($_route === '*' || null == $_route) {
             $match = true;
 
+        //Easily handle 404's
+        } elseif ($_route === '404' && !$matched) {
+            $callback();
+            ++$matched;
+
         //@ is used to specify custom regex
-        } elseif ($_route[$i] === '@') {
+        } elseif (isset($_route[$i]) && $_route[$i] === '@') {
             $match = preg_match('`' . substr($_route, $i + 1) . '`', $uri, $params);
 
         //Compiling and matching regular expressions is relatively
@@ -128,22 +161,19 @@ function dispatch($uri = null, $req_method = null, array $params = null, $captur
                 $_REQUEST = array_merge($_REQUEST, $params);
             }
             try {
-                $countAsMatched = $callback($request, $response, $app, $matched);
+                $callback($request, $response, $app, $matched);
             } catch (Exception $e) {
                 $response->error($e);
             }
-			if (!isset($countAsMatched) || $countAsMatched !== false ) {
-				$matched = true;
-			}
-			unset($countAsMatched);
+            $count_match && ++$matched;
         }
     }
-    if (false === $matched) {
+    if (!$matched) {
         $response->code(404);
     }
     if ($capture) {
         return ob_get_clean();
-    } elseif ($response->isChunked()) {
+    } elseif ($response->chunked) {
         $response->chunk();
     } else {
         ob_end_flush();
@@ -181,7 +211,6 @@ function compile_route($route) {
 
             $route = str_replace($block, $pattern, $route);
         }
-        $route = "$route/?";
     }
     return "`^$route$`";
 }
@@ -269,9 +298,7 @@ class _Request {
 
     //Gets a session variable associated with the request
     public function session($key, $default = null) {
-        if (session_id() === '') {
-            session_start();
-        }
+        startSession();
         return isset($_SESSION[$key]) ? $key : $default;
     }
 
@@ -293,14 +320,15 @@ class _Request {
 
 class _Response extends StdClass {
 
-    protected $_chunked = false;
+    public $chunked = false;
     protected $_errorCallbacks = array();
-	protected $_viewvars = array();
+    protected $_layout = null;
+    protected $_view = null;
 
     //Enable response chunking. See: http://bit.ly/hg3gHb
     public function chunk($str = null) {
-        if (false === $this->_chunked) {
-            $this->_chunked = true;
+        if (false === $this->chunked) {
+            $this->chunked = true;
             header('Transfer-encoding: chunked');
             flush();
         }
@@ -314,10 +342,6 @@ class _Response extends StdClass {
             echo "\r\n";
             flush();
         }
-    }
-
-    public function isChunked() {
-        return $this->_chunked;
     }
 
     //Sets a response header
@@ -336,22 +360,22 @@ class _Response extends StdClass {
     }
 
     //Stores a flash message of $type
-    public function flash($msg, $type = 'error', $params = null) {
-        if (session_id() === '') {
-            session_start();
-        }
+    public function flash($msg, $type = 'info', $params = null) {
+        startSession();
         if (is_array($type)) {
             $params = $type;
-            $type = 'error';
+            $type = 'info';
         }
-        if (!isset($_SESSION["__flash_$type"])) {
-            $_SESSION["__flash_$type"] = array();
+        if (!isset($_SESSION['__flash'])) {
+            $_SESSION['__flash'] = array($type => array());
+        } elseif (!isset($_SESSION['__flash'][$type])) {
+            $_SESSION['__flash'][$type] = array();
         }
-        $_SESSION["__flash_$type"][] = $this->markdown($msg, $params);
+        $_SESSION['__flash'][$type] = $this->markdown($msg, $params);
     }
 
     //Support basic markdown syntax
-    public function markdown($str/*, $arg1, $arg2, ...*/) {
+    public function markdown($str, $args = null) {
         $args = func_get_args();
         $md = array(
             '/\[([^\]]++)\]\(([^\)]++)\)/' => '<a href="$2">$1</a>',
@@ -368,45 +392,36 @@ class _Response extends StdClass {
         return vsprintf(preg_replace(array_keys($md), $md, $str), $args);
     }
 
-    //Sends an object or file
-    public function send($object, $type = 'json', $filename = null) {
-        $this->discard();
-        set_time_limit(1200);
+    //Tell the browser not to cache the response
+    public function noCache() {
         header("Pragma: no-cache");
         header('Cache-Control: no-store, no-cache');
+    }
 
-        switch ($type) {
-        case 'json':
-            $json = json_encode($object);
-            header('Content-Type: text/javascript; charset=utf-8');
+    //Sends a file
+    public function file($path, $filename = null) {
+        $this->discard();
+        $this->noCache();
+        set_time_limit(1200);
+        header('Content-type: ' . finfo_file(finfo_open(FILEINFO_MIME_TYPE), $path));
+        header('Content-length: ' . filesize($path));
+        if (null === $filename) {
+            $filename = basename($path);
+        }
+        header('Content-Disposition: attachment; filename="'.$filename.'"');
+        fpassthru($path);
+    }
+
+    //Sends an object as json
+    public function json($object, $callback = null) {
+        $this->discard();
+        $this->noCache();
+        set_time_limit(1200);
+        $json = json_encode($object);
+        if (null !== $callback) {
+            echo "$callback($json)";
+        } else {
             echo $json;
-            exit;
-        case 'csv':
-            header('Content-type: text/csv; charset=utf-8');
-            if (null === $filename) {
-                $filename = 'output.csv';
-            }
-            header('Content-Disposition: attachment; filename="'.$filename.'"');
-            $columns = false;
-            $escape = function ($value) { return str_replace('"', '""', $value); };
-            foreach ($object as $row) {
-                $row = (array)$row;
-                if (!$columns && !isset($row[0])) {
-                    echo '"' . implode('","', array_keys($row)) . '"' . "\n";
-                    $columns = true;
-                }
-                echo '"' . implode('","', array_map($escape, array_values($row))) . '"' . "\n";
-            }
-            exit;
-        case 'file':
-            header('Content-type: ' . finfo_file(finfo_open(FILEINFO_MIME_TYPE), $object));
-            header('Content-length: ' . filesize($object));
-            if (null === $filename) {
-                $filename = basename($object);
-            }
-            header('Content-Disposition: attachment; filename="'.$filename.'"');
-            fpassthru($object);
-            exit;
         }
     }
 
@@ -439,24 +454,12 @@ class _Response extends StdClass {
     //Sets response properties/helpers
     public function set($key, $value = null) {
         if (!is_array($key)) {
-            $this->_viewvars[$key] = $value;
-			return true;
+            return $this->$key = $value;
         }
         foreach ($key as $k => $value) {
-            $this->_viewvars[$k] = $value;
+            $this->$k = $value;
         }
-		return true;
     }
-
-	// fetch unknown variables. mostly used for rendered views
-	public function __get($name) {
-		if (isset($this->_viewvars[$name])) {
-			return $this->_viewvars[$name];
-		}
-		else {
-			return null;
-		}
-	}
 
     //Adds to or modifies the current query string
     public function query($new, $value = null) {
@@ -477,32 +480,35 @@ class _Response extends StdClass {
         return $request_uri . (!empty($query) ? '?' . http_build_query($query) : null);
     }
 
-    //Renders a view
-    public function render($view, array $data = array(), $chunk = false) {
-        if (!file_exists($view) || !is_readable($view)) {
-            throw new ErrorException("Cannot render $view");
-        }
+    //Set the view layout
+    public function layout($layout) {
+        $this->_layout = $layout;
+    }
+
+    //Renders the current view
+    public function yield() {
+        require $this->_view;
+    }
+
+    //Renders a view + optional layout
+    public function render($view, array $data = array()) {
         if (!empty($data)) {
             $this->set($data);
         }
-        require $view;
-        if (false !== $chunk) {
+        $this->_view = $view;
+        if (null === $this->_layout) {
+            $this->yield();
+        } else {
+            require $this->_layout;
+        }
+        if (false !== $this->chunked) {
             $this->chunk();
         }
     }
 
-	// render a view, but return the value instead of simply dumping it out
-	public function rrender($view, array $data = array()) {
-		ob_start();
-		$this->render($view, $data, false);
-		return ob_get_clean();
-	}
-
     //Sets a session variable
     public function session($key, $value = null) {
-        if (session_id() === '') {
-            session_start();
-        }
+        startSession();
         return $_SESSION[$key] = $value;
     }
 
@@ -538,30 +544,33 @@ class _Response extends StdClass {
         return isset($_REQUEST[$param]) ?  htmlentities($_REQUEST[$param], ENT_QUOTES) : $default;
     }
 
-    //Returns (and clears) all flashes of $type
-    public function getFlashes($type = 'error') {
-        if (session_id() === '') {
-            session_start();
+    //Returns and clears all flashes of optional $type
+    public function flashes($type = null) {
+        startSession();
+        if (!isset($_SESSION['__flashes'])) {
+            return array();
         }
-        if (isset($_SESSION["__flash_$type"])) {
-            $flashes = $_SESSION["__flash_$type"];
-            foreach ($flashes as $k => $flash) {
-                $flashes[$k] = htmlentities($flash, ENT_QUOTES);
+        if (null === $type) {
+            $flashes = $_SESSION['__flashes'];
+            unset($_SESSION['__flashes']);
+        } elseif (null !== $type) {
+            $flashes = array();
+            if (isset($_SESSION['__flashes'][$type])) {
+                $flashes = $_SESSION['__flashes'][$type];
+                unset($_SESSION['__flashes'][$type]);
             }
-            unset($_SESSION["__flash_$type"]);
-            return $flashes;
         }
-        return array();
+        return $flashes;
     }
 
     //Escapes a string
-    public function escape($str, $charset='UTF-8') {
-        return htmlentities($str, ENT_QUOTES, $charset);
+    public function escape($str) {
+        return htmlentities($str, ENT_QUOTES);
     }
 
     //Discards the current output buffer
     public function discard() {
-        ob_end_clean();
+        return ob_end_clean();
     }
 
     //Flushes the current output buffer
@@ -569,9 +578,9 @@ class _Response extends StdClass {
         ob_end_flush();
     }
 
-    //Return the current otuput buffer as a string (and optionally discard)
-    public function outputBuffer($discard = false) {
-        return $discard ? ob_get_clean() : ob_get_contents();
+    //Return the current output buffer as a string
+    public function buffer() {
+        return ob_get_contents();
     }
 
     //Dump a variable
@@ -579,8 +588,7 @@ class _Response extends StdClass {
         if (is_array($obj) || is_object($obj)) {
             $obj = print_r($obj, true);
         }
-        $obj = htmlentities($obj, ENT_QUOTES);
-        echo "<pre>$obj</pre><br />\n";
+        echo '<pre>' .  htmlentities($obj, ENT_QUOTES) . "</pre><br />\n";
     }
 
     //Allow callbacks to be assigned as properties and called like normal methods
