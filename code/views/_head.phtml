@@ -3,20 +3,19 @@
 <head>
 	<meta charset="utf-8">
 
-	<title><?php echo isset($this->title) ? $this->title . ' -- SteamAlerts.com' : 'SteamAlerts.com -- Email notifications when games go on sale' ?></title>
+	<title><?php echo isset($this->title) ? $this->title . ' -- SITE TITLE GOES HERE' : 'SITE TITLE GOES HERE' ?></title>
 
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="<?php echo $this->metaDesc ?>" />
 	<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 
-	<link rel="stylesheet" href="/css/style.css?v=2">
-	<link href='http://fonts.googleapis.com/css?family=Ubuntu:regular,bold' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" href="/css/style.css">
 
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.js"></script>
 	<script>window.jQuery || document.write("<script src='/js/libs/jquery-1.5.1.min.js'>\x3C/script>")</script>
 
-	<?php if ($this->isHomepage) { ?>
+	<?php /* Facebook Support, at some point *//*if ($this->isHomepage) { ?>
 
 	<meta property="og:title" content="SteamAlerts.com"/>
 	<meta property="og:type" content="website"/>
@@ -26,17 +25,17 @@
 	<meta property="fb:admins" content="500035730"/>
 	<meta property="og:description" content="<?php echo $this->metaDesc ?>"/>
 
-	<?php } ?>
+	<?php }*/ ?>
 
 </head>
 <body>
 <div id="container">
     <header>
- 		<h1><a href="/">Steam <strong>Alerts</strong></a></h1>
-		<ul>
-			<li><a href="/">Find Games, Set Watches, Get Alerts</a></li>
-			<li><a href="/all">Everything</a></li>
-			<li><a href="/manage">Manage Alerts</a></li>
+ 		<h1><a href="/">Site Title</a></h1>
+		<ul id="typemenu">
+			<li><a href="/videos/1">Videos</a></li>
+			<li><a href="/pictures/1">Pictures</a></li>
+			<li><a href="/audio/1">Audio</a></li>
 		</ul>
     </header>
     <div id="main" role="main">
