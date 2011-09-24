@@ -161,11 +161,14 @@ function dispatch($uri = null, $req_method = null, array $params = null, $captur
                 $_REQUEST = array_merge($_REQUEST, $params);
             }
             try {
-                $callback($request, $response, $app, $matched);
+                $countTowardsMatches = $callback($request, $response, $app, $matched);
             } catch (Exception $e) {
                 $response->error($e);
             }
-            $count_match && ++$matched;
+            if ($count_match && (!isset($countTowardsMatches) || $countTowardsMatches !== false)) {
+                ++$matched;
+            }
+            unset($countTowardsMatches);
         }
     }
     if (!$matched) {
@@ -322,6 +325,7 @@ class _Response extends StdClass {
 
     public $chunked = false;
     protected $_errorCallbacks = array();
+    protected $_viewvars = array();
     protected $_layout = null;
     protected $_view = null;
 
@@ -454,10 +458,12 @@ class _Response extends StdClass {
     //Sets response properties/helpers
     public function set($key, $value = null) {
         if (!is_array($key)) {
-            return $this->$key = $value;
+            $this->_viewvars[$key] = $value;
         }
-        foreach ($key as $k => $value) {
-            $this->$k = $value;
+        else {
+            foreach ($key as $k => $value) {
+                $this->_viewvars[$k] = $value;
+            }
         }
     }
 
@@ -504,6 +510,13 @@ class _Response extends StdClass {
         if (false !== $this->chunked) {
             $this->chunk();
         }
+    }
+
+    // render a view, but return the value instead of simply dumping it out
+    public function rrender($view, array $data = array()) {
+        ob_start();
+        $this->render($view, $data, false);
+        return ob_get_clean();
     }
 
     //Sets a session variable
@@ -564,8 +577,8 @@ class _Response extends StdClass {
     }
 
     //Escapes a string
-    public function escape($str) {
-        return htmlentities($str, ENT_QUOTES);
+    public function escape($str, $charset='UTF-8') {
+        return htmlentities($str, ENT_QUOTES, $charset);
     }
 
     //Discards the current output buffer
