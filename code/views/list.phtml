@@ -1,0 +1,46 @@
+<?php $this->render(VIEWDIR.'_head.phtml') ?>
+
+	<div id="allitems">
+
+		<h2>All <?php echo number_format(count($this->allitems)) ?> Tracked Items</h2>
+
+		<table>
+			<thead>
+				<tr>
+					<th>Type</th>
+					<th>Item</th>
+					<th>Current Price</th>
+					<th>Last Price Price</th>
+					<th>&rarr; Steam</th>
+				</tr>
+			</thead>
+			<tbody>
+			<?php foreach ($this->allitems as $game) { ?>
+				<tr>
+					<td>
+						<?php echo $this->escape($game[Apps::C_TYPE]) ?>
+					</td>
+					<td>
+						<a href="/i/<?php echo $game[Apps::C_APPID] ?>">
+							<?php echo $this->escape($game[Apps::C_TITLE]) ?>
+						</a>
+					</td>
+					<td align="right"><?php
+						echo formatCurrency($game[Apps::C_AMOUNT], $game[Apps::C_CURRENCY]);
+					?></td>
+					<td align="right"><?php
+						echo formatCurrency($game[Apps::C_PREVIOUSAMOUNT], $game[Apps::C_CURRENCY]);
+					?></td>
+					<td>
+						<a href="http://store.steampowered.com/<?php echo $game[Apps::C_APPID] ?>/">
+							&rarr;
+						</a>
+					</td>
+				</tr>
+			<?php } ?>
+			</tbody>
+		</table>
+
+	</div>
+
+<?php $this->render(VIEWDIR.'_footer.phtml') ?>

@@ -1,0 +1,18 @@
+<VirtualHost *:80>
+    ServerName jd.com
+    DocumentRoot "/www/drupal/site"
+    DirectoryIndex index.html index.php
+
+<Directory /www/drupal/site>
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+</IfModule>
+
+</Directory>
+
+</VirtualHost>

@@ -1,0 +1,4 @@
+syntax: glob
+trialsd/*
+.idea/*
+trialsd.zip
