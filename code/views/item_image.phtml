@@ -1,0 +1,4 @@
+<h3><?= $this->item['title'] ?></h3>
+<div class="postImg"><img src="<?= image($this->item['filename'], array('w' => 400)) ?>" alt="" /></div>
+<div class="postContent"><?= $this->item['comment'] ?></div>
+<div class="date"><?= date('Y-m-d', $this->item['createdAt']) ?></div>

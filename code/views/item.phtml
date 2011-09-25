@@ -1,118 +1,20 @@
-<?php $this->render(VIEWDIR.'_head.phtml', array('metaDesc'=> 'Track and set alerts for price changes on '.$this->escape($this->app[Apps::C_TITLE]))) ?>
 
-	<h2>
-		<a href="http://store.steampowered.com/<?php echo $this->app[Apps::C_APPID] ?>/">
-			<img alt="" style="vertical-align: middle;" width="120" height="45" src="http://cdn.steampowered.com/v/gfx/<?php echo str_replace('/', 's/', $this->app[Apps::C_APPID]) ?>/capsule_sm_120.jpg" />
-		</a>
-		<a href="http://store.steampowered.com/<?php echo $this->app[Apps::C_APPID] ?>/">
-			<?php echo $this->escape($this->app[Apps::C_TITLE]) ?>
-		</a>
-	</h2>
+<div class="item item-<?= $this->item['type'] ?>">
 
-	<table class="cf">
-		<thead>
-			<tr>
-				<th>Current Price</th>
-				<th>Tracking Since</th>
-				<th>Last Changed On</th>
-				<th>Last Seen On</th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr>
-				<td><?php echo formatCurrency($this->app[Apps::C_AMOUNT], $this->app[Apps::C_CURRENCY]) ?></td>
-				<td><?php echo $this->startuiddt ?></td>
-				<td><?php echo $this->changeduiddt ?></td>
-				<td><?php echo $this->latestuiddt ?></td>
-			</tr>
-		</tbody>
-	</table>
+    <?php
 
-	<?php echo $this->render(VIEWDIR.'/setwatch.phtml'); ?>
-	<script type="text/javascript">
-		$(function(){
+    $view = VIEWDIR.'item_'. $this->item['type'] .'.phtml';
+    if (file_exists($view)) {
+        $this->render($view, array('item'=>$this->item));
+    }
+    else {
+        echo '<p>Unknown Post Type</p>';
+        var_dump($item);
+    }
 
-			var setwatcharea = $('#setwatcharea'),
-				setwatchinfo = $('#watchinfo'),
-				errorSuccess = $("div#setwatcherror > p, div#setwatchsuccess > p")
-				;
+    ?>
 
-			currentAppid = '<?php echo $this->app[Apps::C_APPID] ?>';
-			setwatcharea.find('#price').val('<?php echo $this->app[Apps::C_AMOUNT]-0.01 ?>');
-			setwatcharea.find('#infotitle').html('<?php echo $this->escape($this->app[Apps::C_TITLE]) ?>');
+    <p><a href="/edit/<?= $this->item['type'] ?>/<?= $this->item['slug'] ?>">Edit</a></p>
+    <p><a href="/<?= $this->item['slug'] ?>">Link</a></p>
 
-			setwatcharea.show();
-			setwatchinfo.show();
-		})
-	</script>
-
-	<?php if (count($this->history) > 1) { ?>
-	<div id="pricegraph"></div>
-
-	<script type="text/javascript">
-		$(function(){
-			var cur = '<?php echo $this->currency ?>';
-			g = new Dygraph(
-				document.getElementById("pricegraph"),
-				[ <?php
-
-					$set = array();
-					foreach ($this->history as $hitem) {
-						$set[] = '[Date.createFromMysql("'. $hitem['dt'] .'"), '. $hitem['amount'] .']';
-					}
-					echo implode(', ', $set);
-
-				?> ],
-				{
-					labels: ['Date', 'Price'],
-					yAxisLabelFormatter: function(v) {
-						return formatCurrency(v, cur).replace('&nbsp;', ' ');
-					},
-					yValueFormatter: function(v) {
-						return ' ' + formatCurrency(v, cur).replace('&nbsp;', ' ');
-					},
-					labelsDivWidth: 400,
-					labelsDivStyles: {
-						'backgroundColor': 'transparent'
-						,'position': 'absolute'
-						,'top': '0px'
-						,'marginTop': '-0px'
-						,'bottom': 'auto'
-						,'right': '0px'
-						,'left': '0px'
-						,'textAlign': 'right'
-						,'fontSize': '11px'
-					},
-					colors: ["rgb(255,0,0)"],
-					width: 940,
-					height: 240,
-					axisLineColor: 'white'
-				}
-			);
-		});
-	</script>
-	<?php } else { ?>
-
-	<div id="emptypricegraph" style="width: 940px; height: 257px;">
-		<p>This store item does not yet have enough data to be graphed. Please come back later!</p>
-	</div>
-
-	<?php } ?>
-
-	<div id="randomitems">
-		<p>Other Randomly Selected Items</p>
-		<?php foreach ($this->randomitems as $gamedata) { ?>
-
-		<a href="/i/<?php echo $gamedata[Apps::C_APPID] ?>">
-			<img alt="<?php echo $this->escape($gamedata[Apps::C_TITLE]) ?>"
-				 title="<?php echo $this->escape($gamedata[Apps::C_TITLE]) ?>"
-				 width="120" height="45"
-				 src="http://cdn.steampowered.com/v/gfx/<?php echo str_replace('/', 's/', $gamedata[Apps::C_APPID]) ?>/capsule_sm_120.jpg" />
-			<?php echo formatCurrency($gamedata[Apps::C_AMOUNT], $this->cc) ?>
-		</a>
-
-		<?php } ?>
-
-	</div>
-
-<?php $this->render(VIEWDIR.'_footer.phtml') ?>
+</div>

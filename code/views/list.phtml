@@ -1,12 +1,18 @@
 <?php $this->render(VIEWDIR.'_head.phtml') ?>
 
+<h2><?= ucfirst($this->list) ?> items, page <?= $this->page ?></h2>
+
 <?php
 
-var_dump($this->list);
-var_dump($this->page);
-var_dump($this->start);
-var_dump($this->end);
-var_dump($this->items);
+//var_dump($this->list);
+//var_dump($this->page);
+//var_dump($this->start);
+//var_dump($this->end);
+//var_dump($this->items);
+
+foreach ($this->items as $item) {
+    $this->render(VIEWDIR.'item.phtml', array('item'=>$item));
+}
 
 ?>
 

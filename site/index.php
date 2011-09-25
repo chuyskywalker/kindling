@@ -115,7 +115,12 @@ respond('/[:item]', function (_Request $request, _Response $response, $app, $mat
         if (count($itemDetails) == 0) {
             return false;
         }
-        var_dump($itemDetails);
+
+        // TODO: determine previous & next item
+
+        $response->render(VIEWDIR.'_head.phtml', array('title'=>$itemDetails['title']));
+        $response->render(VIEWDIR.'item.phtml', array('item'=>$itemDetails));
+        $response->render(VIEWDIR.'_footer.phtml', array());
 });
 
 function renderList(_Response $response, $list, $page) {
@@ -143,16 +148,20 @@ function renderList(_Response $response, $list, $page) {
         }
     }
 
+    // todo: error out when tehre are no items (probably needs different treatement between type listing and homepage
+
     $response->render(VIEWDIR.'list.phtml', compact('items', 'list', 'page', 'start', 'end'));
 
-    // todo: error out when tehre are no items
-    // todo: display items in list
 }
 
 respond('/[a:type]/[i:page]', function (_Request $request, _Response $response, $app, $matched) {
 	    // list of items by given type
         $type = $request->param('type', false);
-        $page = $request->param('page', 1);
+        $page = (int)$request->param('page', 1);
+        // don't allow people to hit the /all/ category listings -- it's redundant, use /:page instead
+        if ($type == Item::REDIS_ALLPOSTS) {
+            $response->redirect('/' . $page);
+        }
         renderList($response, $type, $page);
 });
 
@@ -161,7 +170,7 @@ $homepage = function (_Request $request, _Response $response, $app, $matched) {
     if ($matched > 0) {
         return false;
     }
-    $page = $request->param('page', 1);
+    $page = (int)$request->param('page', 1);
     renderList($response, Item::REDIS_ALLPOSTS, $page);
     
     return true;
