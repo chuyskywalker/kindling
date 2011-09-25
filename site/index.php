@@ -1,5 +1,6 @@
 <?php
 
+define('BASEDIR', __DIR__);
 require __DIR__.'/../code/all.php';
 
 startSession();
@@ -80,10 +81,11 @@ respond('/edit/[a:type]/[:id]?', function (_Request $request, _Response $respons
 
         if (!$editing && !$request->method('POST')) {
             // push in some fake item details
-            $itemDetails['title']   = !empty($doc) ? $doc : '';
-            $itemDetails['url']     = !empty($url) ? $url : '';
-            $itemDetails['content'] = !empty($sel) ? $sel : '';
-            $itemDetails['comment'] = !empty($sel) ? $sel : '';
+            $itemDetails['title']        = !empty($doc) ? $doc : '';
+            $itemDetails['url']          = !empty($url) ? $url : '';
+            $itemDetails['url_filename'] = !empty($url) ? $url : '';
+            $itemDetails['content']      = !empty($sel) ? $sel : '';
+            $itemDetails['comment']      = !empty($sel) ? $sel : '';
         }
 
         $response->render(VIEWDIR.'edit.phtml', array(

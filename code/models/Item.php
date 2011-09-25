@@ -26,7 +26,7 @@ abstract class Item {
 
     public function save($id, $values) {
 
-        if (!$this->validate($values)) {
+        if (!$this->validate($id, $values)) {
             return false;
         }
 
@@ -99,10 +99,41 @@ abstract class Item {
 
         // gather up all the fields
         foreach ($this->getFields() as $field) {
-            $fieldVals[$field['id']] = $_POST[$field['id']];
+            if ($field['type'] == Form::TYPE_IMAGEUPLOAD) {
+                // slight different handling here
+                $fileUploadDir = BASEDIR . '/uploads/';
+
+                $hascur    = !empty($id) && isset($_POST['cur_' . $field['id']]) && !empty($_POST['cur_' . $field['id']]);
+                $file_real = isset($_FILES['file_' . $field['id']]) && !empty($_FILES['file_' . $field['id']]['tmp_name']) ? $_FILES['file_' . $field['id']] : false;
+                $file_url  = isset($_POST['url_' . $field['id']]) ? $_POST['url_' . $field['id']] : false;
+                $filename  = false;
+
+                if ($file_real) {
+                    // all the validty checks already passed, just copy it in
+                    $filename = $slug . strrchr($file_real['name'],'.');
+                    move_uploaded_file($file_real['tmp_name'], $fileUploadDir.$filename);
+                }
+                elseif ($file_url) {
+                    // save image in
+                    $filename = $slug . strrchr($file_url,'.');
+                    copy($file_url, $fileUploadDir.$filename);
+                }
+                elseif ($hascur) {
+                    $filename = $_POST['cur_' . $field['id']];
+                }
+
+                if ($filename) {
+                    $fieldVals[$field['id']] = $filename;
+                }
+            }
+            else {
+                $fieldVals[$field['id']] = $_POST[$field['id']];
+            }
         }
 
         $fieldVals['type'] = $this->getType();
+
+        // Handle any file/image fields here
 
         // TODO: call $this->preProcessing here for content preProcessing
 
@@ -118,7 +149,7 @@ abstract class Item {
      * @param array $fields
      * @return boolean
      */
-    private function validate($fields) {
+    private function validate($id, $fields) {
         foreach ($this->getFields() as $field) {
             $fieldVal = isset($fields[$field['id']]) ? trim($fields[$field['id']]) : '';
             if (isset($field['rules']) && count($field['rules'])) {
@@ -126,7 +157,17 @@ abstract class Item {
                     switch ($rule) {
 
                         case Form::RULE_REQUIRED:
-                            if ($fieldVal == '') {
+                            // if the field is empty OR it is an image upload and has neither file nor url param, this qualifies as "missing"
+                            if ($field['type'] == Form::TYPE_IMAGEUPLOAD) {
+                                // TODO: Using _FILES and _POST here is cheating...
+                                $hascur  = !empty($id) && isset($_POST['cur_' . $field['id']]) && !empty($_POST['cur_' . $field['id']]);
+                                $hasurl  = isset($_POST['url_' . $field['id']])   && !empty($_POST['url_' . $field['id']]);
+                                $hasfile = isset($_FILES['file_' . $field['id']]) && !empty($_FILES['file_' . $field['id']]['tmp_name']);
+                                if (!$hascur && !$hasfile && !$hasurl) {
+                                    $this->errors[] = 'Missing ' . $field['id'];
+                                }
+                            }
+                            elseif($fieldVal == '') {
                                 $this->errors[] = 'Missing ' . $field['id'];
                             }
                             break;
@@ -168,6 +209,20 @@ abstract class Item {
                             break;
 
                         case Form::RULE_IMAGE_UPLOAD:
+                            // TODO: Using _FILES and _POST here is cheating...
+                            $file_real = isset($_FILES['file_' . $field['id']]) && !empty($_FILES['file_' . $field['id']]['tmp_name']) ? $_FILES['file_' . $field['id']] : false;
+                            $file_url  = isset($_POST['url_' . $field['id']]) ? $_POST['url_' . $field['id']] : false;
+                            if ($file_real) {
+                                $imageInfo = getimagesize($file_real['tmp_name']);
+                                if ($imageInfo === false || !in_array($imageInfo[2], array(IMAGETYPE_GIF, IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_BMP))) {
+                                    $this->errors[] = 'Not a valid image upload ' . $field['id'];
+                                }
+                            }
+                            elseif ($file_url) {
+                                if (!preg_match(Form::REGEX_URL_IMAGE, $file_url)) {
+                                    $this->errors[] = 'Not a valid image URL ' . $field['id'];
+                                }
+                            }
                             break;
 
                         case Form::RULE_VALID_OPTION:

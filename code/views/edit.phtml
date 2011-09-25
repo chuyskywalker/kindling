@@ -8,7 +8,7 @@
 
     <?php // var_dump($this->_viewvars) ?>
 
-    <form action="/edit/<?= $this->type ?>" method="POST">
+    <form action="/edit/<?= $this->type ?><?= $this->itemId ? '/' . $this->itemId : '' ?>" method="POST" enctype="multipart/form-data">
 
         <?php
 
@@ -78,17 +78,17 @@
                     ?>
 
                     <p>
-                        <label><?= $field['id'] ?><br/>
-                            <input type="file" name="file_<?= $field['id'] ?>" /><br/>
-                            or url: <input type="text" name="url_<?= $field['id'] ?>" value="<?= $this->escape(value($field['id'], $this->itemDetails)) ?>" /><br/>
+                        <?= $field['id'] ?><br/>
+                            <input type="file" name="file_<?= $field['id'] ?>" />
+                            or url: <input type="text" name="url_<?= $field['id'] ?>" value="<?= $this->escape(value('url_'.$field['id'], $this->itemDetails)) ?>" /><br/>
                             <em>File Upload will take precedence if both are filled in</em>
                             <?php
                             $current = value($field['id'], $this->itemDetails);
                             if (!empty($current)) {
-                                echo '<br/>Current: ' . $current;
+                                echo '<br/><input type="hidden" name="cur_'. $field['id'] .'" value="'. $current .'" />Current: ' . $current;
                             }
                             ?>
-                        </label>
+
                     </p>
 
                     <?php
