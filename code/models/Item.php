@@ -146,6 +146,7 @@ abstract class Item {
 
     /**
      * @abstract
+     * @param string $id
      * @param array $fields
      * @return boolean
      */
@@ -235,6 +236,9 @@ abstract class Item {
                 }
             }
         }
+
         return count($this->errors) == 0;
+        
     }
+    
 }
