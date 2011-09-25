@@ -1,9 +1,14 @@
 
  
-		</div>
+        </div>
 
-	<footer>
-		<p>START_DATE- <?php echo date('Y') ?> &copy; AUTHOR_NAME</p>
+    <footer>
+        <p>
+            <?= defined('AUTHOR') || defined('STARTED')  ? '&copy; ' : '' ?>
+            <?= defined('STARTED') ? STARTED . ' - ' . date('Y') : '' ?>
+            <?= defined('AUTHOR') && defined('STARTED')  ? ' ' : '' ?>
+            <?= defined('AUTHOR')  ? AUTHOR : '' ?>
+        </p>
 		
         <?php /* social widgets
 		<div id="socialwidgets">
