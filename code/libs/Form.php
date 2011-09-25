@@ -19,4 +19,9 @@ class Form {
     const RULE_IMAGE_UPLOAD = 'imageupload';
     const RULE_VALID_OPTION = 'validoption';
 
+    const REGEX_URL       = '#^https?://#i';
+    const REGEX_URL_IMAGE = '#^https?://.*(jpe?g|gif|png)$#i';
+    const REGEX_URL_AUDIO = '#^https?://.*mp3$#i';
+    const REGEX_URL_VIDEO = '#^https?://(www\.)?(vimeo|youtube)#i';
+
 }

@@ -17,13 +17,46 @@ respond('*', function (_Request $request, _Response $response, $app) {
 	return false;
 });
 
+respond('/bm/go', function (_Request $request, _Response $response, $app, $matched) {
+
+        $url = $request->param('url', false);
+        $sel = $request->param('sel', false);
+        $doc = $request->param('doc', false);
+
+        $type = Item_post::TYPE;
+
+        if ($url) {
+            if (preg_match(Form::REGEX_URL_AUDIO, $url)) {
+                $type = Item_audio::TYPE;
+            }
+            elseif (preg_match(Form::REGEX_URL_IMAGE, $url)) {
+                $type = Item_image::TYPE;
+            }
+            elseif (preg_match(Form::REGEX_URL_VIDEO, $url)) {
+                $type = Item_video::TYPE;
+            }
+            elseif (preg_match(Form::REGEX_URL, $url)) {
+                $type = Item_link::TYPE;
+            }
+        }
+
+        $response->redirect('/edit/' . $type . '?' . http_build_query(array(
+              'url' => $url
+            , 'doc' => $doc
+            , 'sel' => $sel
+            , 'bm'  => 1
+        )));
+
+});
+
 respond('/edit/[a:type]/[:id]?', function (_Request $request, _Response $response, $app, $matched) {
     	// editing an item or creating a new one
         $itemSlug= $request->param('id', false);
         $type    = $request->param('type');
-
         $url     = $request->param('url', false);
-        $content = $request->param('content', false);
+        $sel     = $request->param('sel', false);
+        $doc     = $request->param('doc', false);
+        $bm      = (bool) $request->param('bm', false);
 
         $class = 'Item_' . $type;
         if (!class_exists($class)) {
@@ -45,8 +78,17 @@ respond('/edit/[a:type]/[:id]?', function (_Request $request, _Response $respons
 
         $itemDetails = $editing ? rc::get()->hGetAll(rc::key(Item::REDIS_PREFIX, $itemId)) : false;
 
+        if (!$editing && !$request->method('POST')) {
+            // push in some fake item details
+            $itemDetails['title']   = !empty($doc) ? $doc : '';
+            $itemDetails['url']     = !empty($url) ? $url : '';
+            $itemDetails['content'] = !empty($sel) ? $sel : '';
+            $itemDetails['comment'] = !empty($sel) ? $sel : '';
+        }
+
         $response->render(VIEWDIR.'edit.phtml', array(
               'itemId' => $itemId
+            , 'bm' => $bm
             , 'type' => $type
             , 'saved' => $saved
             , 'errors' => $itemClass->getErrors()

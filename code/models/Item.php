@@ -132,25 +132,25 @@ abstract class Item {
                             break;
 
                         case Form::RULE_URL:
-                            if (!preg_match('#^https?://#i', $fieldVal)) {
+                            if (!preg_match(Form::REGEX_URL, $fieldVal)) {
                                 $this->errors[] = 'Not a valid URL ' . $field['id'];
                             }
                             break;
 
                         case Form::RULE_URL_AUDIO:
-                            if (!preg_match('#^https?://.*mp3$#i', $fieldVal)) {
+                            if (!preg_match(Form::REGEX_URL_AUDIO, $fieldVal)) {
                                 $this->errors[] = 'Not a valid mp3 URL ' . $field['id'];
                             }
                             break;
 
                         case Form::RULE_URL_IMAGE:
-                            if (!preg_match('#^https?://.*(jpe?g|gif|png)$#i', $fieldVal)) {
+                            if (!preg_match(Form::REGEX_URL_IMAGE, $fieldVal)) {
                                 $this->errors[] = 'Not a valid image URL ' . $field['id'];
                             }
                             break;
 
                         case Form::RULE_URL_VIDEO:
-                            if (!preg_match('#^https?://(www\.)?(vimeo|youtube)#i', $fieldVal)) {
+                            if (!preg_match(Form::REGEX_URL_VIDEO, $fieldVal)) {
                                 $this->errors[] = 'Not a valid video URL ' . $field['id'];
                             }
                             break;

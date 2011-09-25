@@ -1,4 +1,4 @@
-<?php $this->render(VIEWDIR.'_head.phtml', array('title'=> ($this->editing ? 'Edit' : 'Create'))) ?>
+<?php if (!$this->bm) $this->render(VIEWDIR.'_head.phtml', array('title'=> ($this->editing ? 'Edit' : 'Create'))) ?>
 
 	<h2><?= $this->editing ? 'Edit' : 'Create' ?> <?= $this->type ?></h2>
 
@@ -8,7 +8,7 @@
 
     <?php // var_dump($this->_viewvars) ?>
 
-    <form action="#" method="POST">
+    <form action="/edit/<?= $this->type ?>" method="POST">
 
         <?php
 
@@ -79,7 +79,9 @@
 
                     <p>
                         <label><?= $field['id'] ?><br/>
-                            <input type="file" name="<?= $field['id'] ?>" />
+                            <input type="file" name="file_<?= $field['id'] ?>" /><br/>
+                            or url: <input type="text" name="url_<?= $field['id'] ?>" value="<?= $this->escape(value($field['id'], $this->itemDetails)) ?>" /><br/>
+                            <em>File Upload will take precedence if both are filled in</em>
                             <?php
                             $current = value($field['id'], $this->itemDetails);
                             if (!empty($current)) {
@@ -112,4 +114,4 @@
         <input type="submit" value="Save" />
     </form>
 
-<?php $this->render(VIEWDIR.'_footer.phtml') ?>
+<?php if (!$this->bm) $this->render(VIEWDIR.'_footer.phtml') ?>
