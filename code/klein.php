@@ -329,6 +329,8 @@ class _Response extends StdClass {
     protected $_layout = null;
     protected $_view = null;
 
+    const FLASH = '__flashes';
+
     //Enable response chunking. See: http://bit.ly/hg3gHb
     public function chunk($str = null) {
         if (false === $this->chunked) {
@@ -370,12 +372,12 @@ class _Response extends StdClass {
             $params = $type;
             $type = 'info';
         }
-        if (!isset($_SESSION['__flash'])) {
-            $_SESSION['__flash'] = array($type => array());
-        } elseif (!isset($_SESSION['__flash'][$type])) {
-            $_SESSION['__flash'][$type] = array();
+        if (!isset($_SESSION[self::FLASH])) {
+            $_SESSION[self::FLASH] = array($type => array());
+        } elseif (!isset($_SESSION[self::FLASH][$type])) {
+            $_SESSION[self::FLASH][$type] = array();
         }
-        $_SESSION['__flash'][$type] = $this->markdown($msg, $params);
+        $_SESSION[self::FLASH][$type] = $this->markdown($msg, $params);
     }
 
     //Support basic markdown syntax
@@ -570,17 +572,17 @@ class _Response extends StdClass {
     //Returns and clears all flashes of optional $type
     public function flashes($type = null) {
         startSession();
-        if (!isset($_SESSION['__flashes'])) {
+        if (!isset($_SESSION[self::FLASH])) {
             return array();
         }
         if (null === $type) {
-            $flashes = $_SESSION['__flashes'];
-            unset($_SESSION['__flashes']);
+            $flashes = $_SESSION[self::FLASH];
+            unset($_SESSION[self::FLASH]);
         } elseif (null !== $type) {
             $flashes = array();
-            if (isset($_SESSION['__flashes'][$type])) {
-                $flashes = $_SESSION['__flashes'][$type];
-                unset($_SESSION['__flashes'][$type]);
+            if (isset($_SESSION[self::FLASH][$type])) {
+                $flashes = $_SESSION[self::FLASH][$type];
+                unset($_SESSION[self::FLASH][$type]);
             }
         }
         return $flashes;
