@@ -513,6 +513,22 @@ class _Response extends StdClass {
         if (!empty($data)) {
             $this->set($data);
         }
+        if (defined('VIEWDIR') && defined('TEMPLATE')) {
+            $vt = VIEWDIR . '/'. TEMPLATE .'/' . ltrim($view,'/');
+            $vd = VIEWDIR . '/'. 'default'.'/' . ltrim($view,'/');
+            if (file_exists($vt)) {
+                $view = $vt;
+            }
+            elseif (file_exists($vd)) {
+                $view = $vd;
+            }
+        }
+        elseif (defined('VIEWDIR')) {
+            $vt = VIEWDIR . '/'. ltrim($view,'/');
+            if (file_exists($vt)) {
+                $view = $vt;
+            }
+        }
         $this->_view = $view;
         if (null === $this->_layout) {
             $this->yield();
