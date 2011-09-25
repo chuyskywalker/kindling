@@ -1,8 +1,8 @@
 <?php
 
-class Item_picture extends Item{
+class Item_image extends Item{
 
-    const TYPE = 'picture';
+    const TYPE = 'image';
 
     static $fields = array(
           array('id' => 'title', 'type' => Form::TYPE_TEXT, 'rules' => array(Form::RULE_REQUIRED => ''))
