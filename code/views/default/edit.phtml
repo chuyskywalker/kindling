@@ -1,4 +1,4 @@
-<?php if (!$this->bm) $this->render(VIEWDIR.'_head.phtml', array('title'=> ($this->editing ? 'Edit' : 'Create'))) ?>
+<?php if (!$this->bm) $this->render('_head.phtml', array('title'=> ($this->editing ? 'Edit' : 'Create'))) ?>
 
 	<h2><?= $this->editing ? 'Edit' : 'Create' ?> <?= $this->type ?></h2>
 
@@ -38,6 +38,16 @@
                     <p>
                         <label><?= $field['id'] ?><br/>
                             <textarea rows="15" cols="40" name="<?= $field['id'] ?>"><?= $this->escape(value($field['id'], $this->itemDetails)) ?></textarea>
+                        </label><br/>
+
+                        <label>Format: 
+                            <select name="format_<?= $field['id'] ?>">
+                                <?php foreach (Form::$formats as $option) { ?>
+
+                                <option<?= value('format_'.$field['id'], $this->itemDetails) == $option ? ' selected' : '' ?>><?= $option ?></option>
+
+                                <?php }?>
+                            </select>
                         </label>
                     </p>
 
@@ -111,7 +121,9 @@
 
         ?>
 
-        <input type="submit" value="Save" />
+        <input type="submit" value="  Save  " /> <label><input type="checkbox" name="_is_static" value="1" <?= value('_is_static', $this->itemDetails) == 1 ? 'checked' : '' ?> /> Exclude from post lists?</label>
+        <hr/>
+        <input type="submit" name="delete" value="Delete" />
     </form>
 
-<?php if (!$this->bm) $this->render(VIEWDIR.'_footer.phtml') ?>
+<?php if (!$this->bm) $this->render('_footer.phtml') ?>

@@ -70,6 +70,12 @@ respond('/edit/[a:type]/[:id]?', function (_Request $request, _Response $respons
 
         $saved = $request->method('POST') ? $itemClass->save($itemId, $_POST) : null;
 
+        if( $request->method('POST') && isset($_POST['delete']) && $_POST['delete'] == 'Delete'){
+            $itemClass->delete($itemId);
+            $response->flash('Post deleted');
+            $response->redirect('/');
+        }
+
         if ($saved === true) {
             $response->flash('Post saved');
             $response->redirect('/');
@@ -88,7 +94,7 @@ respond('/edit/[a:type]/[:id]?', function (_Request $request, _Response $respons
             $itemDetails['comment']      = !empty($sel) ? $sel : '';
         }
 
-        $response->render(VIEWDIR.'edit.phtml', array(
+        $response->render('edit.phtml', array(
               'itemId' => $itemId
             , 'bm' => $bm
             , 'type' => $type
@@ -118,9 +124,9 @@ respond('/[:item]', function (_Request $request, _Response $response, $app, $mat
 
         // TODO: determine previous & next item
 
-        $response->render(VIEWDIR.'_head.phtml', array('title'=>$itemDetails['title']));
-        $response->render(VIEWDIR.'item.phtml', array('item'=>$itemDetails));
-        $response->render(VIEWDIR.'_footer.phtml', array());
+        $response->render('_head.phtml', array('title'=>$itemDetails['title']));
+        $response->render('item.phtml', array('item'=>$itemDetails));
+        $response->render('_footer.phtml', array());
 });
 
 function renderList(_Response $response, $list, $page) {
@@ -150,7 +156,7 @@ function renderList(_Response $response, $list, $page) {
 
     // todo: error out when tehre are no items (probably needs different treatement between type listing and homepage
 
-    $response->render(VIEWDIR.'list.phtml', compact('items', 'list', 'page', 'start', 'end'));
+    $response->render('list.phtml', compact('items', 'list', 'page', 'start', 'end'));
 
 }
 
@@ -181,7 +187,7 @@ respond('/', $homepage);
 respond('*', function (_Request $request, _Response $response, $app, $matched) {
         if ($matched === 0) {
             $response->code(404);
-            $response->render(VIEWDIR.'404.phtml');
+            $response->render('404.phtml');
         }
 });
 

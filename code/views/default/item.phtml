@@ -1,20 +1,15 @@
 
-<div class="item item-<?= $this->item['type'] ?>">
+<div class="item type-<?= $this->item['type'] ?>">
 
-    <?php
+    <?php $this->render('item_'. $this->item['type'] .'.phtml', array('item'=>$this->item)); ?>
 
-    $view = VIEWDIR.'item_'. $this->item['type'] .'.phtml';
-    if (file_exists($view)) {
-        $this->render($view, array('item'=>$this->item));
-    }
-    else {
-        echo '<p>Unknown Post Type</p>';
-        var_dump($item);
-    }
-
-    ?>
-
-    <p><a href="/edit/<?= $this->item['type'] ?>/<?= $this->item['slug'] ?>">Edit</a></p>
-    <p><a href="/<?= $this->item['slug'] ?>">Link</a></p>
+	<ul class="meta">
+		<li class="date"><?= date('Y-m-d', $this->item['createdAt']) ?></li>
+		<li class="comment-count"><a href="/<?= $this->item['slug'] ?>#disqus_thread" data-disqus-identifier="<?= $this->item['slug'] ?>" class="link">Comments</a></li>
+		<?php /*if ($post['view'] == 'articles' || $post['view'] == 'gallery') { foreach ($post['tags'] as $tag) { ?>
+			<li><a rel="tag" href="<?= getTagLink($tag) ?>"><?= htmlspecialchars($tag) ?></a></li>
+		<?php } }*/ ?>
+        <li><a href="/edit/<?= $this->item['type'] ?>/<?= $this->item['slug'] ?>">Edit</a></li>
+	</ul>
 
 </div>

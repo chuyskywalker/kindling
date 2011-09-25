@@ -1,6 +1,6 @@
-<?php $this->render(VIEWDIR.'_head.phtml') ?>
+<?php $this->render('_head.phtml') ?>
 
-<h2><?= ucfirst($this->list) ?> items, page <?= $this->page ?></h2>
+<!--<h2>--><?//= ucfirst($this->list) ?><!-- items, page --><?//= $this->page ?><!--</h2>-->
 
 <?php
 
@@ -11,9 +11,9 @@
 //var_dump($this->items);
 
 foreach ($this->items as $item) {
-    $this->render(VIEWDIR.'item.phtml', array('item'=>$item));
+    $this->render('item.phtml', array('item'=>$item));
 }
 
 ?>
 
-<?php $this->render(VIEWDIR.'_footer.phtml') ?>
+<?php $this->render('_footer.phtml') ?>

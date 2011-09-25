@@ -24,11 +24,27 @@ abstract class Item {
         return $this->errors;
     }
 
+    public function delete($id) {
+
+        $oldKey = rc::key(Item::REDIS_PREFIX, $id);
+        $validId = rc::get()->exists($oldKey);
+        if ($validId) {
+            $allItems = rc::key(self::REDIS_POST_INDEX, self::REDIS_ALLPOSTS);
+            $typeItems = rc::key(self::REDIS_POST_INDEX, $this->getType());
+            rc::get()->zRem($allItems, $id);
+            rc::get()->zRem($typeItems, $id);
+            rc::get()->del($oldKey);
+        }
+
+    }
+
     public function save($id, $values) {
 
         if (!$this->validate($id, $values)) {
             return false;
         }
+
+        $isStatic = isset($_POST['_is_static']) && $_POST['_is_static'] == 1;
 
         $allItems = rc::key(self::REDIS_POST_INDEX, self::REDIS_ALLPOSTS);
         $typeItems = rc::key(self::REDIS_POST_INDEX, $this->getType());
@@ -67,8 +83,10 @@ abstract class Item {
             }
 
             // add item to lists by time/slug
-            rc::get()->zAdd($allItems, $createdAt, $slug);
-            rc::get()->zAdd($typeItems, $createdAt, $slug);
+            if (!$isStatic) {
+                rc::get()->zAdd($allItems, $createdAt, $slug);
+                rc::get()->zAdd($typeItems, $createdAt, $slug);
+            }
 
         }
         else {
@@ -88,12 +106,26 @@ abstract class Item {
                 rc::get()->del($oldKey);
 
                 // add item back to lists by old-time/new-slug
-                rc::get()->zAdd($allItems, $createdAt, $slug);
-                rc::get()->zAdd($typeItems, $createdAt, $slug);
+                if (!$isStatic) {
+                    rc::get()->zAdd($allItems, $createdAt, $slug);
+                    rc::get()->zAdd($typeItems, $createdAt, $slug);
+                }
 
             }
             else if($slugIsUsed) {
                 // we're trying to edit an item, and the slug exists, we just overwrite the hash for the item with new info
+
+                // the staticness of it may have changed, add/remove as appropriate
+                if ($isStatic) {
+                    rc::get()->zRem($allItems, $slug);
+                    rc::get()->zRem($typeItems, $slug);
+                }
+                else {
+                    $createdAt = rc::get()->hGet($oldKey, 'createdAt');
+                    rc::get()->zAdd($allItems, $createdAt, $slug);
+                    rc::get()->zAdd($typeItems, $createdAt, $slug);
+                }
+
             }
         }
 
@@ -126,12 +158,47 @@ abstract class Item {
                     $fieldVals[$field['id']] = $filename;
                 }
             }
+            elseif ($field['type'] == Form::TYPE_LONGTEXT) {
+                // while this is mostly the same, we also want to preprocess the field and save the formatting selection
+                $rawContent = $_POST[$field['id']];
+                $format = $_POST['format_'.$field['id']];
+                switch ($format) {
+
+                    case Form::FORMAT_TEXTILE:
+                        require BASEDIR . '/../code/libs/textile.php';
+                        $textile = new Textile;
+                        $renderedContent = $textile->TextileThis($rawContent);
+                        break;
+
+                    case Form::FORMAT_MARKDOWN:
+                        require BASEDIR . '/../code/libs/markdown.php';
+                        $textile = new Markdown_Parser;
+                        $renderedContent = $textile->transform($rawContent);
+                        break;
+
+                    case Form::FORMAT_HTML:
+                        $renderedContent = $rawContent;
+                        break;
+
+                    case Form::FORMAT_PLAIN:
+                    default:
+                        $renderedContent = '<p>'. nl2br(htmlspecialchars($rawContent)) .'</p>';
+                        break;
+
+                }
+
+                $fieldVals[$field['id']] = $rawContent;
+                $fieldVals['format_'.$field['id']] = $format;
+                $fieldVals[$field['id'].'Rendered'] = $renderedContent;
+
+            }
             else {
                 $fieldVals[$field['id']] = $_POST[$field['id']];
             }
         }
 
         $fieldVals['type'] = $this->getType();
+        $fieldVals['_is_static'] = $isStatic;
 
         // Handle any file/image fields here
 

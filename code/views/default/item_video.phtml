@@ -3,8 +3,6 @@
 <div class="postVideo"><?php
 
 $url = parse_url($this->item['url']);
-//var_dump($this->item);
-//var_dump($url);
 $params = array();
 if (!empty($url['query'])) {
     parse_str($url['query'], $params);
@@ -19,5 +17,4 @@ elseif (strpos($url['host'], 'vimeo') !== false) {
 
 ?></div>
 
-<div class="postContent"><?= $this->item['comment'] ?></div>
-<div class="date"><?= date('Y-m-d', $this->item['createdAt']) ?></div>
+<div class="postContent"><?= $this->item['commentRendered'] ?></div>

@@ -24,4 +24,11 @@ class Form {
     const REGEX_URL_AUDIO = '#^https?://.*mp3$#i';
     const REGEX_URL_VIDEO = '#^https?://(www\.)?(vimeo|youtube)#i';
 
+    const FORMAT_PLAIN = 'Plain';
+    const FORMAT_HTML = 'HTML';
+    const FORMAT_TEXTILE = 'Textile';
+    const FORMAT_MARKDOWN = 'Markdown';
+
+    static $formats = array(self::FORMAT_PLAIN, self::FORMAT_HTML, self::FORMAT_TEXTILE, self::FORMAT_MARKDOWN);
+
 }

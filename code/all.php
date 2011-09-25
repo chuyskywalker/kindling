@@ -2,7 +2,7 @@
 
 require __DIR__ . '/../config.php';
 
-define('VIEWDIR', __DIR__ . '/views/');
+define('VIEWDIR', __DIR__ . '/views');
 
 require __DIR__ . '/models/Item.php';
 require __DIR__ . '/models/post.php';
