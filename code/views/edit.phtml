@@ -1,0 +1,115 @@
+<?php $this->render(VIEWDIR.'_head.phtml', array('title'=> ($this->editing ? 'Edit' : 'Create'))) ?>
+
+	<h2><?= $this->editing ? 'Edit' : 'Create' ?> <?= $this->type ?></h2>
+
+    <?php if (count($this->errors)) {?>
+        <p>Errors: <br/><br/><?= implode('<br/>', $this->errors) ?></p>
+    <?php } ?>
+
+    <?php // var_dump($this->_viewvars) ?>
+
+    <form action="#" method="POST">
+
+        <?php
+
+        function value($field, $itemDetails=null) {
+            if (isset($_POST[$field])) {
+                return $_POST[$field];
+            }
+            elseif (isset($itemDetails[$field])) {
+                return $itemDetails[$field];
+            }
+            else {
+                return '';
+            }
+        }
+
+        foreach ($this->fields as $field) {
+
+            switch ($field['type']) {
+
+                case Form::TYPE_POSTPROCESS:
+                    // we skip this one
+                    break;
+
+                case Form::TYPE_LONGTEXT:
+                    ?>
+
+                    <p>
+                        <label><?= $field['id'] ?><br/>
+                            <textarea rows="15" cols="40" name="<?= $field['id'] ?>"><?= $this->escape(value($field['id'], $this->itemDetails)) ?></textarea>
+                        </label>
+                    </p>
+
+                    <?php
+                    break;
+
+                case Form::TYPE_CHOICE:
+                    ?>
+
+                    <p>
+                        <label><?= $field['id'] ?><br/>
+                            <select name="<?= $field['id'] ?>">
+                                <?php foreach ($field['options'] as $option) { ?>
+
+                                <option<?= value($field['id'], $this->itemDetails) == $option ? ' selected' : '' ?>><?= $option ?></option>
+
+                                <?php }?>
+                            </select>
+                        </label>
+                    </p>
+
+                    <?php
+                    break;
+
+                case Form::TYPE_TEXT:
+                    ?>
+
+                    <p>
+                        <label><?= $field['id'] ?><br/>
+                            <input type="text" name="<?= $field['id'] ?>" value="<?= $this->escape(value($field['id'], $this->itemDetails)) ?>" />
+                        </label>
+                    </p>
+
+                    <?php
+                    break;
+
+                case Form::TYPE_IMAGEUPLOAD:
+                    ?>
+
+                    <p>
+                        <label><?= $field['id'] ?><br/>
+                            <input type="file" name="<?= $field['id'] ?>" />
+                            <?php
+                            $current = value($field['id'], $this->itemDetails);
+                            if (!empty($current)) {
+                                echo '<br/>Current: ' . $current;
+                            }
+                            ?>
+                        </label>
+                    </p>
+
+                    <?php
+                    break;
+
+                case Form::TYPE_URL:
+                    ?>
+
+                    <p>
+                        <label><?= $field['id'] ?><br/>
+                            <input type="text" name="<?= $field['id'] ?>" value="<?= $this->escape(value($field['id'], $this->itemDetails)) ?>" />
+                        </label>
+                    </p>
+
+                    <?php
+                    break;
+
+            }
+        }
+
+        ?>
+
+        <input type="submit" value="Save" />
+    </form>
+
+<?php $this->render(VIEWDIR.'_footer.phtml') ?>
