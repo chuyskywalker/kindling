@@ -1,5 +1,5 @@
 <?php
-
+$s = microtime(true);
 define('BASEDIR', __DIR__);
 require __DIR__.'/../code/all.php';
 
@@ -207,9 +207,18 @@ function renderList(_Response $response, $list, $page) {
         }
     }
 
-    // todo: error out when tehre are no items (probably needs different treatement between type listing and homepage
+    $total = rc::get()->zCard($zset);
 
-    $response->render('list.phtml', compact('items', 'list', 'page', 'start', 'end'));
+    if (count($items) == 0) {
+        if ($list == Item::REDIS_ALLPOSTS) {
+            $response->redirect('/');
+        }
+        else {
+            $response->redirect("/$list/1");
+        }
+    }
+
+    $response->render('list.phtml', compact('items', 'list', 'page', 'start', 'end', 'total'));
 
 }
 
@@ -245,3 +254,6 @@ respond('*', function (_Request $request, _Response $response, $app, $matched) {
 });
 
 dispatch();
+
+$m = number_format(microtime(true) - $s, 6);
+echo "\n<!-- rendered in: $m seconds -->";
