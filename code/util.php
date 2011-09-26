@@ -150,3 +150,26 @@ function imageCacheName($imgFile, $params) {
 	$hash = md5(serialize($params) . $imgFile);
 	return str_replace($filename, 'th_'.$hash.'_'.$filename, $imgFile);
 }
+
+function getItemClasses() {
+    static $classes;
+    if (!isset($classes)) {
+        $classes = array();
+        $all = get_declared_classes();
+        foreach ($all as $classname) {
+            if (preg_match('/^Item_(.*)/', $classname, $m)) {
+                $classes[] = $m[1];
+            }
+        }
+    }
+    return $classes;
+}
+
+function hasAuth() {
+    return isset($_SESSION['hasAuth']) && $_SESSION['hasAuth'] === true;
+}
+
+function giveAuth() {
+    session_regenerate_id(true);
+    $_SESSION['hasAuth'] = true;
+}
