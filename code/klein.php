@@ -365,21 +365,6 @@ class _Response extends StdClass {
         return setcookie($key, $value, $expiry, $path, $domain, $secure, $httponly);
     }
 
-    //Stores a flash message of $type
-    public function flash($msg, $type = 'info', $params = null) {
-        startSession();
-        if (is_array($type)) {
-            $params = $type;
-            $type = 'info';
-        }
-        if (!isset($_SESSION[self::FLASH])) {
-            $_SESSION[self::FLASH] = array($type => array());
-        } elseif (!isset($_SESSION[self::FLASH][$type])) {
-            $_SESSION[self::FLASH][$type] = array();
-        }
-        $_SESSION[self::FLASH][$type] = $this->markdown($msg, $params);
-    }
-
     //Support basic markdown syntax
     public function markdown($str, $args = null) {
         $args = func_get_args();
@@ -469,6 +454,10 @@ class _Response extends StdClass {
         }
     }
 
+    public function __isset($name) {
+        return isset($this->_viewvars[$name]) || isset($this->$name);
+	}
+
     // fetch unknown variables. mostly used for rendered views
 	public function __get($name) {
 		if (isset($this->_viewvars[$name])) {
@@ -524,7 +513,7 @@ class _Response extends StdClass {
             }
         }
         elseif (defined('VIEWDIR')) {
-            $vt = VIEWDIR . '/'. ltrim($view,'/');
+            $vt = VIEWDIR . '/default/'. ltrim($view, '/');
             if (file_exists($vt)) {
                 $view = $vt;
             }
@@ -583,6 +572,21 @@ class _Response extends StdClass {
     //Returns an escaped request paramater
     public function param($param, $default = null) {
         return isset($_REQUEST[$param]) ?  htmlentities($_REQUEST[$param], ENT_QUOTES) : $default;
+    }
+
+    //Stores a flash message of $type
+    public function flash($msg, $type = 'info', $params = null) {
+        startSession();
+        if (is_array($type)) {
+            $params = $type;
+            $type = 'info';
+        }
+        if (!isset($_SESSION[self::FLASH])) {
+            $_SESSION[self::FLASH] = array($type => array());
+        } elseif (!isset($_SESSION[self::FLASH][$type])) {
+            $_SESSION[self::FLASH][$type] = array();
+        }
+        $_SESSION[self::FLASH][$type][] = $this->markdown($msg, $params);
     }
 
     //Returns and clears all flashes of optional $type
