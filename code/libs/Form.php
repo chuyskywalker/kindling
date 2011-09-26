@@ -7,7 +7,6 @@ class Form {
     const TYPE_CHOICE = 'choice';
     const TYPE_IMAGEUPLOAD = 'imageupload';
     const TYPE_URL = 'url';
-    const TYPE_POSTPROCESS = 'postprocess';
 
     const RULE_REQUIRED = 'required';
     const RULE_MINLEN = 'minlen';
