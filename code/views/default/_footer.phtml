@@ -1,77 +1,15 @@
 
  
-        </div>
+            </div><?php // end of #main ?>
 
-    <footer>
-        <p>
-            <?= defined('AUTHOR') || defined('STARTED')  ? '&copy; ' : '' ?>
-            <?= defined('STARTED') ? STARTED . ' - ' . date('Y') : '' ?>
-            <?= defined('AUTHOR') && defined('STARTED')  ? ' ' : '' ?>
-            <?= defined('AUTHOR')  ? AUTHOR : '' ?>
-        </p>
-		
-        <?php /* social widgets
-		<div id="socialwidgets">
-			<div id="follow">
-				<a href="http://twitter.com/steamalerts_<?php echo $this->cc ?>"
-				   class="twitter-follow-button"
-				   data-button="grey"
-				   data-text-color="#FFFFFF"
-				   data-link-color="#00AEFF">Follow @steamalerts_<?php echo $this->cc ?></a>
-			</div>
-			<div id="tweetit">
-				<a href="http://twitter.com/share"
-				   class="twitter-share-button"
-				   data-url="http://steamalerts.com"
-				   data-text="Don't miss a good sale on Steam again, get email alerts for the price you're willing to pay!"
-				   data-count="horizontal"
-				   data-via="steamalerts">Tweet</a>
-			</div>
-			<div id="fbLike">
-				<div id="fb-root"></div>
-				<fb:like href="http://steamalerts.com"
-						 send="false"
-						 width="300"
-						 show_faces="true"
-						 colorscheme="dark"
-						 font="verdana"></fb:like>
-			</div>
-		</div>
-		<script type="text/javascript">
-			window.fbAsyncInit = function() {
-				FB.init({
-					//appId  : 'YOUR APP ID',
-					status : true, // check login status
-					cookie : true, // enable cookies to allow the server to access the session
-					xfbml  : true  // parse XFBML
-				});
-			};
-			(function() {
-				var e = document.createElement('script');
-				e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
-				e.async = true;
-				document.getElementById('fb-root').appendChild(e);
-			}());
-		</script>
-		<script src="http://platform.twitter.com/widgets.js" type="text/javascript"></script>
-        */ ?>
+        <footer>
+            <?php $this->render('footer_copyright.phtml') ?>
+        </footer>
 
-	</footer>
-	</div><?php // end of #container ?>
+    </div><?php // end of #container ?>
 
-    <?php /*
-	<script src="/js/script.js"></script>
-	<script src="/js/dygraph-combined.js"></script>
-    */ ?>
-
-    <?php if (defined('GA_UA')) { ?>
-	<script>
-		var _gaq=[["_setAccount","<?= GA_UA ?>"],["_trackPageview"]];
-		(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;
-		g.src=("https:"==location.protocol?"//ssl":"//www")+".google-analytics.com/ga.js";
-		s.parentNode.insertBefore(g,s)}(document,"script"));
-	</script>
-    <?php } ?>
+    <?php $this->render('footer_disqus.phtml') ?>
+    <?php $this->render('footer_ga.phtml') ?>
 
 </body> 
 </html>

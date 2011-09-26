@@ -1,0 +1,9 @@
+<p>
+    &copy; <?
+    $s = date('Y', $this->startdate);
+    $e = date('Y', $this->enddate);
+
+    echo ($s == $e) ? $s : "$s - $e";
+
+    ?> <?= defined('AUTHOR') ? AUTHOR : '' ?>
+</p>

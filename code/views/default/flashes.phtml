@@ -1,0 +1,17 @@
+<?php
+
+/** @var $this _Response */
+$flashes = $this->flashes();
+if ($flashes) {
+    echo '<div class="flashes">';
+
+    foreach ($flashes as $flashtype => $flashMsgs) {
+        foreach ($flashMsgs as $flashMsg) {
+            echo '<div class="flash flash-'.$flashtype.'">'. $flashMsg .'</div>';
+        }
+    }
+    
+    echo '</div>';
+}
+
+?>
