@@ -5,7 +5,7 @@
 <script type="text/javascript">
     /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
     var disqus_shortname = '<?= DISQUS_SHORTNAME ?>'; // required: replace example with your forum shortname
-	var disqus_identifier = '<?= $this->item['createdAt'] ?>';
+	var disqus_identifier = '<?= isset($this->item['dqid']) ? $this->item['dqid'] : $this->item['createdAt'] ?>';
 	var disqus_developer = 1;
 
     /* * * DON'T EDIT BELOW THIS LINE * * */
