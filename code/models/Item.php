@@ -232,47 +232,47 @@ abstract class Item {
                                 $hasurl  = isset($_POST['url_' . $field['id']])   && !empty($_POST['url_' . $field['id']]);
                                 $hasfile = isset($_FILES['file_' . $field['id']]) && !empty($_FILES['file_' . $field['id']]['tmp_name']);
                                 if (!$hascur && !$hasfile && !$hasurl) {
-                                    $this->errors[] = 'Missing ' . $field['id'];
+                                    $this->errors[] = $field['label'] . ' is missing and is required.';
                                 }
                             }
                             elseif($fieldVal == '') {
-                                $this->errors[] = 'Missing ' . $field['id'];
+                                $this->errors[] = $field['label'] . ' is missing and is required.';
                             }
                             break;
 
                         case Form::RULE_URL:
                             if (!preg_match(Form::REGEX_URL, $fieldVal)) {
-                                $this->errors[] = 'Not a valid URL ' . $field['id'];
+                                $this->errors[] = $field['label'] . ' is not a valid URL.';
                             }
                             break;
 
                         case Form::RULE_URL_AUDIO:
                             if (!preg_match(Form::REGEX_URL_AUDIO, $fieldVal)) {
-                                $this->errors[] = 'Not a valid mp3 URL ' . $field['id'];
+                                $this->errors[] = $field['label'] . ' is not a valid audio URL.';
                             }
                             break;
 
                         case Form::RULE_URL_IMAGE:
                             if (!preg_match(Form::REGEX_URL_IMAGE, $fieldVal)) {
-                                $this->errors[] = 'Not a valid image URL ' . $field['id'];
+                                $this->errors[] = $field['label'] . ' is not a valid image URL.';
                             }
                             break;
 
                         case Form::RULE_URL_VIDEO:
                             if (!preg_match(Form::REGEX_URL_VIDEO, $fieldVal)) {
-                                $this->errors[] = 'Not a valid video URL ' . $field['id'];
+                                $this->errors[] = $field['label'] . ' is not a valid video URL.';
                             }
                             break;
 
                         case Form::RULE_MAXLEN:
                             if (strlen($fieldVal) > $operator) {
-                                $this->errors[] = 'Value is too long ' . $field['id'];
+                                $this->errors[] = $field['label'] . ' is too long.';
                             }
                             break;
 
                         case Form::RULE_MINLEN:
                             if (strlen($fieldVal) < $operator) {
-                                $this->errors[] = 'Value is too short ' . $field['id'];
+                                $this->errors[] = $field['label'] . ' is too short.';
                             }
                             break;
 
@@ -283,12 +283,19 @@ abstract class Item {
                             if ($file_real) {
                                 $imageInfo = getimagesize($file_real['tmp_name']);
                                 if ($imageInfo === false || !in_array($imageInfo[2], array(IMAGETYPE_GIF, IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_BMP))) {
-                                    $this->errors[] = 'Not a valid image upload ' . $field['id'];
+                                    $this->errors[] = $field['label'] . ' upload is not an image file.';
                                 }
                             }
                             elseif ($file_url) {
                                 if (!preg_match(Form::REGEX_URL_IMAGE, $file_url)) {
-                                    $this->errors[] = 'Not a valid image URL ' . $field['id'];
+                                    // TODO: This might be troublesome for sites like imgur which don't need a file extension...
+                                    $this->errors[] = $field['label'] . ' URL is not valid.';
+                                }
+                                else {
+                                    $imageInfo = getimagesize($file_url);
+                                    if ($imageInfo === false || !in_array($imageInfo[2], array(IMAGETYPE_GIF, IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_BMP))) {
+                                        $this->errors[] = $field['label'] . ' URL does not point at a valid image.';
+                                    }
                                 }
                             }
                             break;

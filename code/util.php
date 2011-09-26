@@ -121,13 +121,13 @@ function image($imgName, $params=array()) {
 				}
 				else {
 					// You have to pick at least one resize value...
-//					err('You must select at least one dimension when resizing an image.', $destFull, json_encode($params));
-					return $source;
+//					die('You must select at least one dimension when resizing an image.' . $source . json_encode($params));
+					return str_replace(BASEDIR, '', $source);
 				}
 			}
 			catch (Exception $e) {
-//				err('Failed to open image.', $e->getMessage());
-				return $source;
+//				die('Failed to open image.' . $e->getMessage());
+				return str_replace(BASEDIR, '', $source);
 			}
 		}
 
