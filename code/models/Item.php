@@ -162,30 +162,8 @@ abstract class Item {
                 // while this is mostly the same, we also want to preprocess the field and save the formatting selection
                 $rawContent = $_POST[$field['id']];
                 $format = $_POST['format_'.$field['id']];
-                switch ($format) {
 
-                    case Form::FORMAT_TEXTILE:
-                        require BASEDIR . '/../code/libs/textile.php';
-                        $textile = new Textile;
-                        $renderedContent = $textile->TextileThis($rawContent);
-                        break;
-
-                    case Form::FORMAT_MARKDOWN:
-                        require BASEDIR . '/../code/libs/markdown.php';
-                        $textile = new Markdown_Parser;
-                        $renderedContent = $textile->transform($rawContent);
-                        break;
-
-                    case Form::FORMAT_HTML:
-                        $renderedContent = $rawContent;
-                        break;
-
-                    case Form::FORMAT_PLAIN:
-                    default:
-                        $renderedContent = '<p>'. nl2br(htmlspecialchars($rawContent)) .'</p>';
-                        break;
-
-                }
+                $renderedContent = renderContent($rawContent, $format);
 
                 $fieldVals[$field['id']] = $rawContent;
                 $fieldVals['format_'.$field['id']] = $format;
@@ -199,10 +177,6 @@ abstract class Item {
 
         $fieldVals['type'] = $this->getType();
         $fieldVals['_is_static'] = (int)$isStatic;
-
-        // Handle any file/image fields here
-
-        // TODO: call $this->preProcessing here for content preProcessing
 
         // and save 'em out
         rc::get()->hMset($newKey, $fieldVals);

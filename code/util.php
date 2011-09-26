@@ -173,3 +173,54 @@ function giveAuth() {
     session_regenerate_id(true);
     $_SESSION['hasAuth'] = true;
 }
+
+function renderContent($content, $format) {
+
+    $content = trim($content);
+    if (empty($content)) {
+        return '';
+    }
+
+    // parse it as PHP first
+
+    try {
+        ob_start();
+        eval(' ?>' . $content);
+        $content = ob_get_clean();
+    }
+    catch (Exception $e) {
+        $content = "PHP Excetion while parseing: ". $e->getMessage() ."\n\n" . $content;
+    }
+    
+    switch ($format) {
+
+        case Form::FORMAT_TEXTILE:
+        case 'textile':
+            require_once BASEDIR . '/../code/libs/textile.php';
+            $textile = new Textile;
+            $renderedContent = $textile->TextileThis($content);
+            break;
+
+        case Form::FORMAT_MARKDOWN:
+        case 'markdown':
+            require_once BASEDIR . '/../code/libs/markdown.php';
+            $textile = new Markdown_Parser;
+            $renderedContent = $textile->transform($content);
+            break;
+
+        case Form::FORMAT_HTML:
+        case 'html':
+        case 'htm':
+            $renderedContent = $content;
+            break;
+
+        case Form::FORMAT_PLAIN:
+        default:
+            $renderedContent = '<p>'. nl2br(htmlspecialchars($content)) .'</p>';
+            break;
+
+    }
+
+    return $renderedContent;
+    
+}
