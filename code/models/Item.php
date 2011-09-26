@@ -198,7 +198,7 @@ abstract class Item {
         }
 
         $fieldVals['type'] = $this->getType();
-        $fieldVals['_is_static'] = $isStatic;
+        $fieldVals['_is_static'] = (int)$isStatic;
 
         // Handle any file/image fields here
 
