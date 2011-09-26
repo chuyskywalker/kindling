@@ -1,14 +1,19 @@
 <?php if (!$this->bm) $this->render('_head.phtml', array('title'=> ($this->editing ? 'Edit' : 'Create'))) ?>
 
-	<h2><?= $this->editing ? 'Edit' : 'Create' ?> <?= $this->type ?></h2>
+<?php if (!$this->bm) { ?>
+	<h2><?= $this->editing ? 'Edit' : 'Create' ?> <?= ucfirst($this->type) ?> Item</h2>
+    <p>New: <?php foreach (getItemClasses() as $type) { ?>
+        <a href="/edit/<?= $type ?>"><?= ucfirst($type) ?></a>
+    <?php } ?></p>
+<?php } ?>
 
     <?php if (count($this->errors)) {?>
-        <p>Errors: <br/><br/><?= implode('<br/>', $this->errors) ?></p>
+        <div class="postcontent">Errors: <ol><li><?= implode('</li><li>', $this->errors) ?></li></ol></div>
     <?php } ?>
 
     <?php // var_dump($this->_viewvars) ?>
 
-    <form action="/edit/<?= $this->type ?><?= $this->itemId ? '/' . $this->itemId : '' ?>" method="POST" enctype="multipart/form-data">
+    <form id="edit" action="/edit/<?= $this->type ?><?= $this->itemId ? '/' . $this->itemId : '' ?>" method="POST" enctype="multipart/form-data">
 
         <?php
 
@@ -28,15 +33,11 @@
 
             switch ($field['type']) {
 
-                case Form::TYPE_POSTPROCESS:
-                    // we skip this one
-                    break;
-
                 case Form::TYPE_LONGTEXT:
                     ?>
 
                     <p>
-                        <label><?= $field['id'] ?><br/>
+                        <label><?= isset($field['label']) ? $field['label'] : $field['id'] ?><br/>
                             <textarea rows="15" cols="40" name="<?= $field['id'] ?>"><?= $this->escape(value($field['id'], $this->itemDetails)) ?></textarea>
                         </label><br/>
 
@@ -58,7 +59,7 @@
                     ?>
 
                     <p>
-                        <label><?= $field['id'] ?><br/>
+                        <label><?= isset($field['label']) ? $field['label'] : $field['id'] ?><br/>
                             <select name="<?= $field['id'] ?>">
                                 <?php foreach ($field['options'] as $option) { ?>
 
@@ -76,7 +77,7 @@
                     ?>
 
                     <p>
-                        <label><?= $field['id'] ?><br/>
+                        <label><?= isset($field['label']) ? $field['label'] : $field['id'] ?><br/>
                             <input type="text" name="<?= $field['id'] ?>" value="<?= $this->escape(value($field['id'], $this->itemDetails)) ?>" />
                         </label>
                     </p>
@@ -88,7 +89,7 @@
                     ?>
 
                     <p>
-                        <?= $field['id'] ?><br/>
+                        <?= isset($field['label']) ? $field['label'] : $field['id'] ?><br/>
                             <input type="file" name="file_<?= $field['id'] ?>" />
                             or url: <input type="text" name="url_<?= $field['id'] ?>" value="<?= $this->escape(value('url_'.$field['id'], $this->itemDetails)) ?>" /><br/>
                             <em>File Upload will take precedence if both are filled in</em>
@@ -108,7 +109,7 @@
                     ?>
 
                     <p>
-                        <label><?= $field['id'] ?><br/>
+                        <label><?= isset($field['label']) ? $field['label'] : $field['id'] ?><br/>
                             <input type="text" name="<?= $field['id'] ?>" value="<?= $this->escape(value($field['id'], $this->itemDetails)) ?>" />
                         </label>
                     </p>
@@ -123,7 +124,12 @@
 
         <input type="submit" value="  Save  " /> <label><input type="checkbox" name="_is_static" value="1" <?= value('_is_static', $this->itemDetails) == 1 ? 'checked' : '' ?> /> Exclude from post lists?</label>
         <hr/>
-        <input type="submit" name="delete" value="Delete" />
+        <?php if ($this->editing) { ?>
+            <input type="submit" name="delete" value="Delete" />
+        <?php } ?>
+        <?php if ($this->bm) { ?>
+            <input type="hidden" name="bm" value="1" />
+        <?php } ?>
     </form>
 
 <?php if (!$this->bm) $this->render('_footer.phtml') ?>
