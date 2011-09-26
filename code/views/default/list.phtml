@@ -10,8 +10,17 @@
 //var_dump($this->end);
 //var_dump($this->items);
 
-foreach ($this->items as $item) {
-    $this->render('item.phtml', array('item'=>$item));
+//var_dump(isset($this->items));
+//var_dump(count($this->items));
+//var_dump($this->items);
+
+if(isset($this->items) && count($this->items)) {
+    foreach ($this->items as $item) {
+        $this->render('item.phtml', array('item'=>$item));
+    }
+}
+else {
+    echo '<p>There are no '. $this->list .' items yet.</p>';
 }
 
 ?>

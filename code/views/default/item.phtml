@@ -4,12 +4,16 @@
     <?php $this->render('item_'. $this->item['type'] .'.phtml', array('item'=>$this->item)); ?>
 
 	<ul class="meta">
-		<li class="date"><?= date('Y-m-d', $this->item['createdAt']) ?></li>
-		<li class="comment-count"><a href="/<?= $this->item['slug'] ?>#disqus_thread" data-disqus-identifier="<?= $this->item['slug'] ?>" class="link">Comments</a></li>
-		<?php /*if ($post['view'] == 'articles' || $post['view'] == 'gallery') { foreach ($post['tags'] as $tag) { ?>
-			<li><a rel="tag" href="<?= getTagLink($tag) ?>"><?= htmlspecialchars($tag) ?></a></li>
-		<?php } }*/ ?>
+        <?php if ($this->item['_is_static'] == 0) { ?>
+        <li class="date"><?= date('Y-m-d', $this->item['createdAt']) ?></li>
+        <li class="comment-count"><a href="/<?= $this->item['slug'] ?>#disqus_thread" data-disqus-identifier="<?= $this->item['createdAt'] ?>" class="link">Comments</a></li>
+        <?php /*if ($post['view'] == 'articles' || $post['view'] == 'gallery') { foreach ($post['tags'] as $tag) { ?>
+            <li><a rel="tag" href="<?= getTagLink($tag) ?>"><?= htmlspecialchars($tag) ?></a></li>
+        <?php } }*/ ?>
+        <?php } ?>
+        <?php if (hasAuth()) { ?>
         <li><a href="/edit/<?= $this->item['type'] ?>/<?= $this->item['slug'] ?>">Edit</a></li>
+        <?php } ?>
 	</ul>
 
 </div>
