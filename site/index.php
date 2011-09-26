@@ -12,10 +12,48 @@ if (strstr($_SERVER['REQUEST_URI'],'?') !== false && empty($_SERVER['QUERY_STRIN
 }
 
 respond('*', function (_Request $request, _Response $response, $app) {
-//	$cc = isset($_COOKIE['cc']) && in_array($_COOKIE['cc'], History::$currencies) ? $_COOKIE['cc'] : History::CURRENCY_US;
-//	$response->set('cc', $cc);
-//	$response->set('metaDesc', 'Meta');
-	return false;
+        // get the start/end of this blogs post history
+        $allItems = rc::key(Item::REDIS_POST_INDEX, Item::REDIS_ALLPOSTS);
+        $firstItem = rc::get()->zRange($allItems, 0, 0, true);
+        $lastItem  = rc::get()->zRevRange($allItems, 0, 0, true);
+        $response->set('startdate', array_pop($firstItem));
+        $response->set('enddate', array_pop($lastItem));
+	    return false;
+});
+
+respond('/auth/login', function (_Request $request, _Response $response, $app, $matched) {
+
+        if (!defined('PASSWORD')) {
+            die('You must setup config.php to have a <br/><br/><code>define(\'PASSWORD\', \'valuehere\');</code><br/><br/> line. The value must be a SHA1 hash of your password.');
+        }
+        else {
+            if ($request->method('POST') && isset($_POST['password']) && sha1($_POST['password']) == PASSWORD){
+                giveAuth();
+                // todo: redirect back to where the user was trying to get to
+                $response->redirect('/');
+            }
+            $response->render('login.phtml');
+        }
+
+});
+
+respond('/bm/close', function (_Request $request, _Response $response, $app, $matched) {
+
+        echo 'Posted. Closing in <span id="close">3</span>. <a href="javascript:self.close()">Close now</a>.
+        <script>
+            var d = document.getElementById("close");
+            var ms = new Date().getTime();
+            setInterval(function() {
+                var ns = new Date().getTime();
+                var cin = ns - ms;
+                d.innerHTML = 3 - Math.floor(cin/1000);
+                if (cin > 3000) {
+                    self.close();
+                }
+            }, 150);
+        </script>
+        ';
+
 });
 
 respond('/bm/go', function (_Request $request, _Response $response, $app, $matched) {
@@ -51,6 +89,11 @@ respond('/bm/go', function (_Request $request, _Response $response, $app, $match
 });
 
 respond('/edit/[a:type]/[:id]?', function (_Request $request, _Response $response, $app, $matched) {
+
+        if (!hasAuth()) {
+            $response->redirect('/auth/login');
+        }
+        
     	// editing an item or creating a new one
         $itemSlug= $request->param('id', false);
         $type    = $request->param('type');
@@ -70,15 +113,20 @@ respond('/edit/[a:type]/[:id]?', function (_Request $request, _Response $respons
 
         $saved = $request->method('POST') ? $itemClass->save($itemId, $_POST) : null;
 
-        if( $request->method('POST') && isset($_POST['delete']) && $_POST['delete'] == 'Delete'){
+        if ($request->method('POST') && isset($_POST['delete']) && $_POST['delete'] == 'Delete'){
             $itemClass->delete($itemId);
             $response->flash('Post deleted');
             $response->redirect('/');
         }
 
         if ($saved === true) {
-            $response->flash('Post saved');
-            $response->redirect('/');
+            if ($bm) {
+                $response->redirect('/bm/close');
+            }
+            else {
+                $response->flash('Post saved');
+                $response->redirect('/'.$itemId);
+            }
         }
 
         $editing = $itemId !== false;
@@ -126,19 +174,24 @@ respond('/[:item]', function (_Request $request, _Response $response, $app, $mat
 
         $response->render('_head.phtml', array('title'=>$itemDetails['title']));
         $response->render('item.phtml', array('item'=>$itemDetails));
+        if ($itemDetails['_is_static'] == 0) {
+            $response->render('disqus.phtml', array('item'=>$itemDetails));
+        }
         $response->render('_footer.phtml', array());
+
+        return true;
 });
 
 function renderList(_Response $response, $list, $page) {
 
     if ($list != Item::REDIS_ALLPOSTS && !class_exists('Item_' . $list)) {
-        die('Invalid type');
+        $response->redirect('/');
     }
 
     $zset = rc::key(Item::REDIS_POST_INDEX, $list);
     if (!rc::get()->exists($zset)) {
-        die('No content here');
-        // todo: handle better :)
+        $response->render('list.phtml', compact('list'));
+        return;
     }
 
     $start = ($page - 1) * PERPAGE;
