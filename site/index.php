@@ -218,6 +218,10 @@ function renderList(_Response $response, $list, $page) {
         }
     }
 
+    if ($list != Item::REDIS_ALLPOSTS || $page != 1) {
+        $response->set('title', ucfirst($list) . ' Items, Page ' . $page);
+    }
+    
     $response->render('list.phtml', compact('items', 'list', 'page', 'start', 'end', 'total'));
 
 }
