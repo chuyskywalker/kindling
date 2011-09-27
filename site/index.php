@@ -212,7 +212,7 @@ respond('/feed/[(rss|rss2|atom):type]', function (_Request $request, _Response $
                 // faaaancy
                 switch ($itemDetails['type']) {
                     case Item_image::TYPE:
-                        $newItem->setDescription('<p><img src="' . $siteurl . '/uploads/' . $itemDetails['filename'] .'" alt="" /></p>' . $itemDetails['commentRendered']);
+                        $newItem->setDescription('<p><img src="' . $app->siteurl . image($itemDetails['filename'], array('w'=>640)) .'" alt="" /></p>' . $itemDetails['commentRendered']);
                         break;
                     default:
                         if (isset($itemDetails['commentRendered'])) {
