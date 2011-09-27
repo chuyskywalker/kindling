@@ -9,7 +9,7 @@ if (!empty($url['query'])) {
 }
 
 if (strpos($url['host'], 'youtube') !== false) {
-    echo '<iframe width="640" height="510" src="http://www.youtube.com/embed/'. $params['v'] .'" frameborder="0" allowfullscreen></iframe>';
+    echo '<iframe width="640" height="360" src="http://www.youtube.com/embed/'. $params['v'] .'" frameborder="0" allowfullscreen></iframe>';
 }
 elseif (strpos($url['host'], 'vimeo') !== false) {
     echo '<iframe src="http://player.vimeo.com/video'. $url['path'] .'" width="640" height="360" frameborder="0"></iframe>';

@@ -1,18 +1,8 @@
 <?php $this->render('_head.phtml') ?>
 
-<!--<h2>--><?//= ucfirst($this->list) ?><!-- items, page --><?//= $this->page ?><!--</h2>-->
+<?php /* <h2><?= ucfirst($this->list) ?> items, page <?= $this->page ?></h2> */ ?>
 
 <?php
-
-//var_dump($this->list);
-//var_dump($this->page);
-//var_dump($this->start);
-//var_dump($this->end);
-//var_dump($this->items);
-
-//var_dump(isset($this->items));
-//var_dump(count($this->items));
-//var_dump($this->items);
 
 if(isset($this->items) && count($this->items)) {
     foreach ($this->items as $item) {
@@ -24,7 +14,7 @@ if(isset($this->items) && count($this->items)) {
     $items = paginate($user_params=array(
         'cur_page'        => $this->page,
         'total_results'   => $this->total, // should be INT
-        'per_page'        => PERPAGE,
+        'per_page'        => $this->perpage,
         'format'          =>  '<a href="'. $linkprefix .'{P}">{Pt}</a>',
     ));
 
@@ -34,6 +24,10 @@ if(isset($this->items) && count($this->items)) {
     
 }
 else {
+    // cant create and "ALL" item
+    if ($this->list == Item::REDIS_ALLPOSTS) {
+        $this->list = Item_post::TYPE;
+    }
     echo '
     <center>
         <p>There are no '. $this->list .' items yet.</p>

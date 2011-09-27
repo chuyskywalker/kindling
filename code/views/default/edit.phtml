@@ -122,11 +122,17 @@
 
         ?>
 
-        <input type="submit" value="  Save  " /> <label><input type="checkbox" name="_is_static" value="1" <?= value('_is_static', $this->itemDetails) == 1 ? 'checked' : '' ?> /> Exclude from post lists?</label>
-        <hr/>
+
+
+        <div style="float: left">
+            <input type="submit" value="  Save  " />
+            <label><input type="checkbox" name="_is_static" value="1" <?= value('_is_static', $this->itemDetails) == 1 ? 'checked' : '' ?> /> Exclude from post lists?</label>
+        </div>
+
         <?php if ($this->editing) { ?>
-            <input type="submit" name="delete" value="Delete" />
+            <input type="submit" name="delete" value="Delete" style="float: right"/>
         <?php } ?>
+        
         <?php if ($this->bm) { ?>
             <input type="hidden" name="bm" value="1" />
         <?php } ?>
