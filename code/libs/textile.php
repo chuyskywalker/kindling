@@ -1010,7 +1010,7 @@ class Textile
 	function footnoteID($id, $t)
 	{
 		if (empty($this->fn[$id]))
-			$this->fn[$id] = $id;//uniqid(rand());
+			$this->fn[$id] = uniqid(rand());
 		$fnid = $this->fn[$id];
 		return '<sup class="footnote"><a href="#fn'.$fnid.'">'.$id.'</a></sup>'.$t;
 	}
