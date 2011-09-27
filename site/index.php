@@ -7,18 +7,30 @@ startSession();
 
 // fix lighttp query string
 if (strstr($_SERVER['REQUEST_URI'],'?') !== false && empty($_SERVER['QUERY_STRING'])) {
-	$_SERVER['QUERY_STRING'] = preg_replace('#^.*?\?#','',$_SERVER['REQUEST_URI']);
-	parse_str($_SERVER['QUERY_STRING'], $_GET);
+    $_SERVER['QUERY_STRING'] = preg_replace('#^.*?\?#','',$_SERVER['REQUEST_URI']);
+    parse_str($_SERVER['QUERY_STRING'], $_GET);
 }
 
 respond('*', function (_Request $request, _Response $response, $app) {
+
+        // figure out the site URL
+        $siteurl = rtrim(defined('URL') ? URL : 'http://'.$_SERVER['HTTP_HOST'], '/');
+        $response->set('siteurl', $siteurl);
+        $app->siteurl = $siteurl;
+        
         // get the start/end of this blogs post history
         $allItems = rc::key(Item::REDIS_POST_INDEX, Item::REDIS_ALLPOSTS);
         $firstItem = rc::get()->zRange($allItems, 0, 0, true);
         $lastItem  = rc::get()->zRevRange($allItems, 0, 0, true);
-        $response->set('startdate', array_pop($firstItem));
-        $response->set('enddate', array_pop($lastItem));
-	    return false;
+        if ($firstItem && $lastItem) {
+            $response->set('startdate', array_pop($firstItem));
+            $response->set('enddate', array_pop($lastItem));
+        }
+        else {
+            $response->set('startdate', time());
+            $response->set('enddate', time());
+        }
+        return false;
 });
 
 respond('/auth/login', function (_Request $request, _Response $response, $app, $matched) {
@@ -94,7 +106,7 @@ respond('/edit/[a:type]/[:id]?', function (_Request $request, _Response $respons
             $response->redirect('/auth/login');
         }
         
-    	// editing an item or creating a new one
+        // editing an item or creating a new one
         $itemSlug= $request->param('id', false);
         $type    = $request->param('type');
         $url     = $request->param('url', false);
@@ -155,11 +167,74 @@ respond('/edit/[a:type]/[:id]?', function (_Request $request, _Response $respons
         
 });
 
+respond('/feed/[(rss|rss2|atom):type]', function (_Request $request, _Response $response, $app, $matched) {
+
+        // if no items, 404 it
+        $zset = rc::key(Item::REDIS_POST_INDEX, Item::REDIS_ALLPOSTS);
+        if (!rc::get()->exists($zset)) {
+            $response->code(404);
+            return;
+        }
+        
+        // determine format
+        switch ($request->param('type')) {
+            case 'atom': $type = ATOM; break;
+            case 'rss': $type = RSS1; break;
+            case 'rss2': default: $type = RSS2; break;
+        }
+        
+        // setup the basics
+        $TestFeed = new FeedWriter($type);
+        $TestFeed->setTitle(defined('TITLE') ? TITLE : 'Tumblite');
+        $TestFeed->setLink($app->siteurl);
+        $TestFeed->setDescription(defined('DESCRIPTION') ? DESCRIPTION : 'A blog by ' . (defined('AUTHOR') ? AUTHOR : 'Anonymous'));
+
+        // get the list of recent items
+        $page = 1;
+        $perpage = (defined('PERPAGE') ? PERPAGE : 10);
+        $start = ($page - 1) * $perpage;
+        $end   = $start + $perpage - 1;
+
+        $itemList = rc::get()->zRevRange($zset, (int)$start, (int)$end);
+
+        // loop items, have party
+        if (count($itemList)) {
+            foreach ($itemList as $itemId) {
+                $itemDetails = rc::get()->hGetAll(rc::key(Item::REDIS_PREFIX, $itemId));
+                
+                $newItem = $TestFeed->createNewItem();
+
+                // make with the pretty feed item elements
+                $newItem->setTitle($itemDetails['title']);
+                $newItem->setLink($app->siteurl .'/'. $itemDetails['slug']);
+                $newItem->setDate($itemDetails['createdAt']);
+
+                // faaaancy
+                switch ($itemDetails['type']) {
+                    case Item_image::TYPE:
+                        $newItem->setDescription('<p><img src="' . $siteurl . '/uploads/' . $itemDetails['filename'] .'" alt="" /></p>' . $itemDetails['commentRendered']);
+                        break;
+                    default:
+                        if (isset($itemDetails['commentRendered'])) {
+                            $newItem->setDescription($itemDetails['commentRendered']);
+                        }
+                        break;
+                }
+
+                // Add the feed item
+                $TestFeed->addItem($newItem);
+            }
+        }
+
+        // Spit it out
+        $TestFeed->genarateFeed();
+});
+
 respond('/[:item]', function (_Request $request, _Response $response, $app, $matched) {
         if ($matched > 0) { 
             return false;
         }
-    	// single item
+        // single item
         $itemId = $request->param('item', false);
         if ($itemId === false || empty($itemId)) {
             return false;
@@ -194,8 +269,9 @@ function renderList(_Response $response, $list, $page) {
         return;
     }
 
-    $start = ($page - 1) * PERPAGE;
-    $end   = $start + PERPAGE - 1;
+    $perpage = (defined('PERPAGE') ? PERPAGE : 10);
+    $start = ($page - 1) * $perpage;
+    $end   = $start + $perpage - 1;
 
     $itemList = rc::get()->zRevRange($zset, (int)$start, (int)$end);
 
@@ -222,12 +298,12 @@ function renderList(_Response $response, $list, $page) {
         $response->set('title', ucfirst($list) . ' Items, Page ' . $page);
     }
     
-    $response->render('list.phtml', compact('items', 'list', 'page', 'start', 'end', 'total'));
+    $response->render('list.phtml', compact('items', 'list', 'page', 'start', 'end', 'total', 'perpage'));
 
 }
 
 respond('/[a:type]/[i:page]', function (_Request $request, _Response $response, $app, $matched) {
-	    // list of items by given type
+        // list of items by given type
         $type = $request->param('type', false);
         $page = (int)$request->param('page', 1);
         // don't allow people to hit the /all/ category listings -- it's redundant, use /:page instead
