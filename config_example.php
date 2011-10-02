@@ -10,7 +10,7 @@
 // Typically, your name or alias
 //define('AUTHOR', 'Anonymous');
 
-// How shall this site be called?
+// The title of your site
 //define('TITLE', 'Tumblite');
 
 // If you build a custom set of views (code/views/<idhere>) then place that template folder name here
