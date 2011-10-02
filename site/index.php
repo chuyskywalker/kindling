@@ -11,6 +11,8 @@ if (strstr($_SERVER['REQUEST_URI'],'?') !== false && empty($_SERVER['QUERY_STRIN
     parse_str($_SERVER['QUERY_STRING'], $_GET);
 }
 
+try {
+
 respond('*', function (_Request $request, _Response $response, $app) {
 
         // figure out the site URL
@@ -337,3 +339,9 @@ dispatch();
 
 $m = number_format(microtime(true) - $s, 6);
 echo "\n<!-- rendered in: $m seconds -->";
+
+}
+catch (Exception $e) {
+    // Usually means Redis is offline
+    echo 'Sorry, this blog is offline currently.';
+}
