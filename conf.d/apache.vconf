@@ -1,9 +1,9 @@
 <VirtualHost *:80>
     ServerName jd.com
-    DocumentRoot "/www/drupal/site"
+    DocumentRoot "/pcwww/tumblite/site/"
     DirectoryIndex index.html index.php
 
-    <Directory /www/drupal/site>
+    <Directory /pcwww/tumblite/site/>
         <IfModule mod_rewrite.c>
         RewriteEngine On
         RewriteBase /
@@ -22,7 +22,7 @@
 
 <VirtualHost *:443>
     ServerName jd.com
-    DocumentRoot "/www/drupal/site"
+    DocumentRoot "/pcwww/tumblite/site/"
     DirectoryIndex index.html index.php
 
     SSLEngine on
@@ -36,7 +36,7 @@
     CustomLog logs/ssl_request_log "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \"%r\" %b"
 
 
-    <Directory /www/drupal/site>
+    <Directory /pcwww/tumblite/site/>
         <IfModule mod_rewrite.c>
         RewriteEngine On
         RewriteBase /
