@@ -1,7 +1,7 @@
 <?php if (!$this->bm) $this->render('_head.phtml', array('title'=> ($this->editing ? 'Edit' : 'Create'))) ?>
 
 <?php if (!$this->bm) { ?>
-	<h2><a href="/edit">All Items</a>: <?= $this->editing ? 'Edit' : 'Create' ?> <?= ucfirst($this->type) ?> Item</h2>
+    <h2><a href="/edit">All Items</a>: <?= $this->editing ? 'Edit' : 'Create' ?> <?= ucfirst($this->type) ?> Item</h2>
     <p>New: <?php foreach (getItemClasses() as $type) { ?>
         <a href="/edit/<?= $type ?>"><?= ucfirst($type) ?></a>
     <?php } ?></p>

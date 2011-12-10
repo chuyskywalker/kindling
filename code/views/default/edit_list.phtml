@@ -2,11 +2,11 @@
 
 <h2>Item List</h2>
 <p>New: <?php foreach (getItemClasses() as $type) { ?>
-	<a href="/edit/<?= $type ?>"><?= ucfirst($type) ?></a>
+    <a href="/edit/<?= $type ?>"><?= ucfirst($type) ?></a>
 <?php } ?></p>
 
 <?php if (count($this->errors)) {?>
-	<div class="postcontent">Errors: <ol><li><?= implode('</li><li>', $this->errors) ?></li></ol></div>
+    <div class="postcontent">Errors: <ol><li><?= implode('</li><li>', $this->errors) ?></li></ol></div>
 <?php } ?>
 
 <?php //var_dump($this->_viewvars) ?>

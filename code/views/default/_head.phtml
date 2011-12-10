@@ -1,14 +1,14 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<title><?php
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title><?php
 
         $title = defined('TITLE') ? TITLE : 'Tumblite';
         echo isset($this->title) ? $this->title . ' | ' . $title : $title;
 
     ?></title>
-	<link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/style.css" />
     <link rel="alternate" type="application/rss+xml"  title="RSS 2.0"   href="/feed/rss2" />
     <link rel="alternate" type="text/xml"             title="RSS 1.0"   href="/feed/rss" />
     <link rel="alternate" type="application/atom+xml" title="Atom 0.3"  href="/feed/atom" />
@@ -17,18 +17,18 @@
 <div id="container">
     
     <header>
- 		<h1><a href="/"><?= $title ?></a></h1>
-		<ul id="typemenu">
-			<li><a href="/video/1">Videos</a></li>
-			<li><a href="/status/1">Status</a></li>
-			<li><a href="/image/1">Images</a></li>
-			<li><a href="/audio/1">Audio</a></li>
-			<li><a href="/post/1">Posts</a></li>
-			<li><a href="/link/1">Links</a></li>
+        <h1><a href="/"><?= $title ?></a></h1>
+        <ul id="typemenu">
+            <li><a href="/video/1">Videos</a></li>
+            <li><a href="/status/1">Status</a></li>
+            <li><a href="/image/1">Images</a></li>
+            <li><a href="/audio/1">Audio</a></li>
+            <li><a href="/post/1">Posts</a></li>
+            <li><a href="/link/1">Links</a></li>
             <?php if ($this->hasAuth) { ?>
             <li><a href="/edit/post">Admin</a></li>
             <?php } ?>
-		</ul>
+        </ul>
     </header>
 
     <?php $this->render('flashes.phtml') ?>
