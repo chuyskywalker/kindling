@@ -302,7 +302,7 @@ class _Request {
     //Gets a session variable associated with the request
     public function session($key, $default = null) {
         startSession();
-        return isset($_SESSION[$key]) ? $key : $default;
+        return isset($_SESSION[$key]) ? $_SESSION[$key] : $default;
     }
 
     //Gets the request IP address
@@ -328,6 +328,7 @@ class _Response extends StdClass {
     protected $_viewvars = array();
     protected $_layout = null;
     protected $_view = null;
+    protected $_code = 200;
 
     const FLASH = '__flashes';
 
@@ -390,17 +391,20 @@ class _Response extends StdClass {
     }
 
     //Sends a file
-    public function file($path, $filename = null) {
+    public function file($path, $filename = null, $mimetype = null) {
         $this->discard();
         $this->noCache();
         set_time_limit(1200);
-        header('Content-type: ' . finfo_file(finfo_open(FILEINFO_MIME_TYPE), $path));
-        header('Content-length: ' . filesize($path));
         if (null === $filename) {
             $filename = basename($path);
         }
+        if (null === $mimetype) {
+            $mimetype = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $path);
+        }
+        header('Content-type: ' . $mimetype);
+        header('Content-length: ' . filesize($path));
         header('Content-Disposition: attachment; filename="'.$filename.'"');
-        fpassthru($path);
+        readfile($path);
     }
 
     //Sends an object as json
@@ -417,9 +421,13 @@ class _Response extends StdClass {
     }
 
     //Sends a HTTP response code
-    public function code($code) {
-        $protocol = isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0';
-        header("$protocol $code");
+    public function code($code = null) {
+        if(null !== $code) {
+            $this->_code = $code;
+            $protocol = isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0';
+            header("$protocol $code");
+        }
+        return $this->_code;
     }
 
     //Redirects the request to another URL
@@ -534,6 +542,14 @@ class _Response extends StdClass {
         ob_start();
         $this->render($view, $data, false);
         return ob_get_clean();
+    }
+
+    // Renders a view without a layout
+    public function partial($view, array $data = array()) {
+        $layout = $this->_layout;
+        $this->_layout = null;
+        $this->render($view, $data);
+        $this->_layout = $layout;
     }
 
     //Sets a session variable
