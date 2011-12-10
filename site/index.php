@@ -3,8 +3,6 @@ $s = microtime(true);
 define('BASEDIR', __DIR__);
 require __DIR__.'/../code/all.php';
 
-startSession();
-
 // fix lighttp query string
 if (strstr($_SERVER['REQUEST_URI'],'?') !== false && empty($_SERVER['QUERY_STRING'])) {
     $_SERVER['QUERY_STRING'] = preg_replace('#^.*?\?#','',$_SERVER['REQUEST_URI']);
@@ -19,7 +17,11 @@ respond('*', function (_Request $request, _Response $response, $app) {
         $siteurl = rtrim(defined('URL') ? URL : 'http://'.$_SERVER['HTTP_HOST'], '/');
         $response->set('siteurl', $siteurl);
         $app->siteurl = $siteurl;
-        
+
+        // always run hasAuth eveyr request -- helps keep the "session" alive as it will reset the auth cookie for logged in users
+        $app->hasAuth = hasAuth();
+        $response->set('hasAuth', $app->hasAuth);
+
         // get the start/end of this blogs post history
         $allItems = rc::key(Item::REDIS_POST_INDEX, Item::REDIS_ALLPOSTS);
         $firstItem = rc::get()->zRange($allItems, 0, 0, true);
@@ -104,7 +106,7 @@ respond('/bm/go', function (_Request $request, _Response $response, $app, $match
 
 respond('/edit/[a:type]/[:id]?', function (_Request $request, _Response $response, $app, $matched) {
 
-        if (!hasAuth()) {
+        if (!$app->hasAuth) {
             $response->redirect('/auth/login');
         }
         
@@ -117,8 +119,8 @@ respond('/edit/[a:type]/[:id]?', function (_Request $request, _Response $respons
         $bm      = (bool) $request->param('bm', false);
 
         $class = 'Item_' . $type;
-        if (!class_exists($class)) {
-            die('Invalid type');
+        if (class_exists($class) !== true) {
+            return false;
         }
         /** @var $itemClass Item */
         $itemClass = new $class();
@@ -167,6 +169,44 @@ respond('/edit/[a:type]/[:id]?', function (_Request $request, _Response $respons
             , 'editing' => $editing
         ));
         
+});
+
+respond('/edit/[:page]?', function (_Request $request, _Response $response, $app, $matched) {
+
+    if ($matched > 0) {
+        return false;
+    }
+
+	if (!$app->hasAuth) {
+		$response->redirect('/auth/login');
+	}
+
+    $page = (int)$request->param('page', 1);
+
+    $zset = rc::key(Item::REDIS_POST_INDEX, Item::REDIS_ALLPOSTS);
+    if (!rc::get()->exists($zset)) {
+        $response->render('list.phtml', compact('list'));
+        return;
+    }
+
+    $perpage = (defined('ADMIN_PERPAGE') ? ADMIN_PERPAGE : 10);
+    $start = ($page - 1) * $perpage;
+    $end   = $start + $perpage - 1;
+
+    $itemList = rc::get()->zRevRange($zset, (int)$start, (int)$end);
+
+    $items = array();
+
+    if (count($itemList)) {
+        foreach ($itemList as $itemId) {
+            $items[] = rc::get()->hGetAll(rc::key(Item::REDIS_PREFIX, $itemId));
+        }
+    }
+
+    $total = rc::get()->zCard($zset);
+
+    $response->render('edit_list.phtml', compact('items', 'list', 'page', 'start', 'end', 'total', 'perpage'));
+
 });
 
 respond('/feed/[(rss|rss2|atom):type]', function (_Request $request, _Response $response, $app, $matched) {
@@ -307,6 +347,10 @@ function renderList(_Response $response, $list, $page) {
 respond('/[a:type]/[i:page]', function (_Request $request, _Response $response, $app, $matched) {
         // list of items by given type
         $type = $request->param('type', false);
+        if ($type == 'edit') {
+            // nope, this is an edit page, ignore this.
+            return false;
+        }
         $page = (int)$request->param('page', 1);
         // don't allow people to hit the /all/ category listings -- it's redundant, use /:page instead
         if ($type == Item::REDIS_ALLPOSTS) {
