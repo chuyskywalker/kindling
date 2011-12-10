@@ -4,3 +4,5 @@ config.php
 code/views/jrm/*
 site/css/*
 site/img/*
+site/uploads/*
+site/robots.txt
