@@ -166,12 +166,21 @@ function getItemClasses() {
 }
 
 function hasAuth() {
-    return isset($_SESSION['hasAuth']) && $_SESSION['hasAuth'] === true;
+
+	// do they have the auth cookie, and is it valid?
+	if (isset($_COOKIE['ta']) && $_COOKIE['ta'] === sha1(PASSWORD . PASSWORD)) {
+		// should we extend the cookie life?
+		if (defined('COOKIETIMEOUT') && COOKIETIMEOUT !== null) {
+			setcookie('ta', $_COOKIE['ta'], time() + COOKIETIMEOUT, '/', null, null, true);
+		}
+		return true;
+	}
+
+    return false;
 }
 
 function giveAuth() {
-    session_regenerate_id(true);
-    $_SESSION['hasAuth'] = true;
+	setcookie('ta', sha1(PASSWORD . PASSWORD), (defined('COOKIETIMEOUT') ? time() + COOKIETIMEOUT : null ), '/', null, null, true);
 }
 
 function renderContent($content, $format) {
