@@ -31,7 +31,7 @@ else {
     echo '
     <center>
         <p>There are no '. $this->list .' items yet.</p>
-        <p>' . ( hasAuth() ?
+        <p>' . ( $this->hasAuth ?
             '<a href="/edit/'. $this->list . '">Create a new '. ucfirst($this->list) . ' item</a>.'
           : '<a href="/auth/login">Login</a> to create new posts.'
         ) . '</p>
