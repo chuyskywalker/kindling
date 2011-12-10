@@ -25,6 +25,9 @@
 			<li><a href="/audio/1">Audio</a></li>
 			<li><a href="/post/1">Posts</a></li>
 			<li><a href="/link/1">Links</a></li>
+            <?php if ($this->hasAuth) { ?>
+            <li><a href="/edit/post">Admin</a></li>
+            <?php } ?>
 		</ul>
     </header>
 
