@@ -141,7 +141,10 @@ respond('/edit/[a:type]/[:id]?', function (_Request $request, _Response $respons
             $response->redirect('/bm/close');
         }
         else {
-            $response->flash('Post saved');
+            $url = (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off' ? 'http://' : 'https://' )
+                 . $_SERVER['HTTP_HOST']
+                 . $_SERVER['REQUEST_URI'];
+            $response->flash('Post saved <script type="text/javascript">try { localStorage.removeItem("form_'. $url .'"); } catch (e) {}</script>');
             $response->redirect('/'.$itemId);
         }
     }

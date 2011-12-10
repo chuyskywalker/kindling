@@ -11,6 +11,8 @@
         <div class="postcontent">Errors: <ol><li><?= implode('</li><li>', $this->errors) ?></li></ol></div>
     <?php } ?>
 
+    <div id="recover" class="flash flash-info" style="display: none;"></div>
+
     <?php // var_dump($this->_viewvars) ?>
 
     <form id="edit" action="/edit/<?= $this->type ?><?= $this->itemId ? '/' . $this->itemId : '' ?>" method="POST" enctype="multipart/form-data">
@@ -136,6 +138,9 @@
         <?php if ($this->bm) { ?>
             <input type="hidden" name="bm" value="1" />
         <?php } ?>
+
     </form>
+
+    <script type="text/javascript" src="/js/recover.js"></script>
 
 <?php if (!$this->bm) $this->render('_footer.phtml') ?>
