@@ -7,3 +7,4 @@ site/img/*
 site/uploads/*
 site/robots.txt
 themes/*/*
+site/favicon.ico
