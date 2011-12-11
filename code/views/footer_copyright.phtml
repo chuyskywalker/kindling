@@ -1,3 +1,5 @@
+
+<form id="authy" method="post" action="/auth/log<?= $this->hasAuth ? 'out' : 'in' ?>">
 <p>
     &copy; <?
     $s = date('Y', $this->startdate);
@@ -5,5 +7,8 @@
 
     echo ($s == $e) ? $s : "$s - $e";
 
-    ?> <?= defined('AUTHOR') ? AUTHOR : 'Anonymous' ?> - <a href="/auth/login">Admin Login</a>
+    ?> <?= defined('AUTHOR') ? AUTHOR : 'Anonymous' ?>
+    -
+        <input type="submit" value="Log<?= $this->hasAuth ? 'out' : 'in' ?>" />
 </p>
+</form>

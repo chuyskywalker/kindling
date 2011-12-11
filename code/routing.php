@@ -41,13 +41,29 @@ respond('/auth/login', function (_Request $request, _Response $response, $app, $
         die('You must setup config.php to have a <br/><br/><code>define(\'PASSWORD\', \'valuehere\');</code><br/><br/> line. The value must be a SHA1 hash of your password.');
     }
     else {
+        $redirect = $request->param('return', false);
+        $response->set('redirect', $redirect);
         if ($request->method('POST') && isset($_POST['password']) && sha1($_POST['password']) == PASSWORD){
             giveAuth();
-            // todo: redirect back to where the user was trying to get to
-            $response->redirect('/');
+            if ($redirect) {
+                $response->redirect($redirect);
+            }
+            else {
+                $response->redirect('/');
+            }
         }
         $response->render('login.phtml');
     }
+
+});
+
+respond('/auth/logout', function (_Request $request, _Response $response, $app, $matched) {
+
+    if ($request->method('POST')){
+        clearAuth();
+    }
+
+    $response->redirect('/');
 
 });
 
@@ -105,7 +121,7 @@ respond('/bm/go', function (_Request $request, _Response $response, $app, $match
 respond('/edit/[a:type]/[:id]?', function (_Request $request, _Response $response, $app, $matched) {
 
     if (!$app->hasAuth) {
-        $response->redirect('/auth/login');
+        $response->redirect(returnAuthUrl());
     }
 
     // editing an item or creating a new one
@@ -179,7 +195,7 @@ respond('/edit/[:page]?', function (_Request $request, _Response $response, $app
     }
 
 	if (!$app->hasAuth) {
-		$response->redirect('/auth/login');
+		$response->redirect(returnAuthUrl());
 	}
 
     $page = (int)$request->param('page', 1);

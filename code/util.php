@@ -165,7 +165,21 @@ function getItemClasses() {
     return $classes;
 }
 
+function returnAuthUrl() {
+    return '/auth/login?return=' . urlencode(
+             (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off' ? 'http://' : 'https://' )
+           . $_SERVER['HTTP_HOST']
+           . $_SERVER['REQUEST_URI']
+           . (isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '')
+           );
+}
+
 function hasAuth() {
+
+    // can't do auth if you aint got a password set :)
+    if (!defined('PASSWORD')) {
+        return false;
+    }
 
 	// do they have the auth cookie, and is it valid?
 	if (isset($_COOKIE['ta']) && $_COOKIE['ta'] === sha1(PASSWORD . PASSWORD)) {
@@ -180,7 +194,14 @@ function hasAuth() {
 }
 
 function giveAuth() {
+    if (!defined('PASSWORD')) {
+        return;
+    }
 	setcookie('ta', sha1(PASSWORD . PASSWORD), (defined('COOKIETIMEOUT') ? time() + COOKIETIMEOUT : null ), '/', null, null, true);
+}
+
+function clearAuth() {
+	setcookie('ta', null, 0, '/', null, null, true);
 }
 
 function renderContent($content, $format) {
