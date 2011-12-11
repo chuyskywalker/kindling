@@ -27,7 +27,7 @@
     <?php } else { ?>
         <?php foreach ($this->items as $idx => $item) { ?>
             <tr>
-                <td><?= date('Y-m-d', $item['createdAt']); ?></td>
+                <td nowrap><?= date('Y-m-d', $item['createdAt']); ?></td>
                 <td><a href="/edit/<?= $this->escape($item['type']); ?>/<?= $this->escape($item['slug']); ?>">
                     <?= $this->escape($item['title']); ?>
                 </a></td>
