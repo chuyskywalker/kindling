@@ -133,7 +133,6 @@ abstract class Item {
         foreach ($this->getFields() as $field) {
             if ($field['type'] == Form::TYPE_IMAGEUPLOAD) {
                 // slight different handling here
-                $fileUploadDir = BASEDIR . '/uploads/';
 
                 $hascur    = !empty($id) && isset($_POST['cur_' . $field['id']]) && !empty($_POST['cur_' . $field['id']]);
                 $file_real = isset($_FILES['file_' . $field['id']]) && !empty($_FILES['file_' . $field['id']]['tmp_name']) ? $_FILES['file_' . $field['id']] : false;
@@ -143,12 +142,12 @@ abstract class Item {
                 if ($file_real) {
                     // all the validty checks already passed, just copy it in
                     $filename = $slug . strrchr($file_real['name'],'.');
-                    move_uploaded_file($file_real['tmp_name'], $fileUploadDir.$filename);
+                    move_uploaded_file($file_real['tmp_name'], UPLOADDIR.'/'.$filename);
                 }
                 elseif ($file_url) {
                     // save image in
                     $filename = $slug . strrchr($file_url,'.');
-                    copy($file_url, $fileUploadDir.$filename);
+                    copy($file_url, UPLOADDIR.'/'.$filename);
                 }
                 elseif ($hascur) {
                     $filename = $_POST['cur_' . $field['id']];
@@ -251,6 +250,14 @@ abstract class Item {
                             break;
 
                         case Form::RULE_IMAGE_UPLOAD:
+                            // check for the upload folder
+                            if (!is_dir(UPLOADDIR) || !is_writable(UPLOADDIR)) {
+                                // ah, hrm, I see. Let's try to make it -- save them some time
+                                $madeDir = @mkdir(UPLOADDIR, 0666);
+                                if ($madeDir !== true) {
+                                    $this->errors[] = $field['label'] . ' upload can not be processed until the directory '. UPLOADDIR .' exists and is writeable.';
+                                }
+                            }
                             // TODO: Using _FILES and _POST here is cheating...
                             $file_real = isset($_FILES['file_' . $field['id']]) && !empty($_FILES['file_' . $field['id']]['tmp_name']) ? $_FILES['file_' . $field['id']] : false;
                             $file_url  = isset($_POST['url_' . $field['id']]) ? $_POST['url_' . $field['id']] : false;

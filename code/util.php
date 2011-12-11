@@ -89,7 +89,7 @@ function toAscii($str, $replace=array(), $delimiter='-') {
  */
 function image($imgName, $params=array()) {
 
-	$source = BASEDIR . '/uploads/' . $imgName;
+	$source = UPLOADDIR. '/' . $imgName;
 
 	if (count($params)) {
 		require_once BASEDIR.'/../code/libs/phpthumb/ThumbLib.inc.php';

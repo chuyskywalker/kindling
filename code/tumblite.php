@@ -5,6 +5,7 @@ $s = microtime(true);
 require __DIR__ . '/../config.php';
 
 define('VIEWDIR', __DIR__ . '/views');
+define('UPLOADDIR', BASEDIR . '/uploads');
 
 require __DIR__ . '/models/Item.php';
 require __DIR__ . '/models/post.php';
