@@ -1,7 +1,4 @@
 <?php
-$s = microtime(true);
-define('BASEDIR', __DIR__);
-require __DIR__.'/../code/all.php';
 
 // fix lighttp query string
 if (strstr($_SERVER['REQUEST_URI'],'?') !== false && empty($_SERVER['QUERY_STRING'])) {

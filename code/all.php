@@ -1,5 +1,7 @@
 <?php
 
+$s = microtime(true);
+
 require __DIR__ . '/../config.php';
 
 define('VIEWDIR', __DIR__ . '/views');
@@ -18,3 +20,6 @@ require __DIR__ . '/libs/Form.php';
 require __DIR__ . '/libs/paginate.php';
 require __DIR__ . '/klein.php';
 require __DIR__ . '/util.php';
+
+// The router, will also dispactch. Should be the last thing require'd
+require __DIR__ . '/routing.php';
