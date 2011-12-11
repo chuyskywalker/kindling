@@ -90,8 +90,6 @@ function recoverFormData(id) {
     for (var formName in formData) {
         var form = document.getElementById(formName);
         for (var formElementName in formData[formName]) {
-            console.log(formElementName);
-            console.log(formData[formName][formElementName]);
 
             var formElemnt = form.elements[formElementName];
             var type = formElemnt.type.toLowerCase();
@@ -245,7 +243,10 @@ function clearAutoSaveTrigger() {
 
 function recoverLink() {
     recoverFormData();
-    discardLink();
+    autoSave();
+    var rDiv = document.getElementById('recover');
+    rDiv.style.display = 'none';
+    rDiv.innerHTML = '';
 }
 function discardLink() {
     clearFormData();
