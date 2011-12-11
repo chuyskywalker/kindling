@@ -1,6 +1,12 @@
 <?php
 
 /** @var $this _Response */
+
+if (!$this->hasAuth) {
+    // non-authed users don't ever get flashes, so stop starting sessions for them.
+    return;
+}
+
 $flashes = $this->flashes();
 if ($flashes) {
     echo '<div class="flashes">';
