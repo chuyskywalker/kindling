@@ -191,7 +191,7 @@ if (isLocalStorageSupported()) {
         var value = localStorage.getItem("form_" + window.location.href);
         if (value) {
             startAutoSave = false;
-            rDiv.innerHTML = 'You appear to have an unsaved form entry here. <a href="javascript:recoverLink()">Click to recover...</a> or <a href="javascript:discardLink()">discared content.</a>. You should either <strong>recover or discard else autosave will not be active</strong> and you could lose data!';
+            rDiv.innerHTML = 'You appear to have an unsaved form entry here. <a href="javascript:recoverLink()">Click to recover...</a> or <a href="javascript:discardLink()">discard content.</a>. You should either <strong>recover or discard else autosave will not be active</strong> and you could lose data!';
             rDiv.style.display = 'block';
         }
         
