@@ -35,6 +35,77 @@ respond('*', function (_Request $request, _Response $response, $app) {
 
 });
 
+respond('/default-static/[*:content]', function (_Request $request, _Response $response, $app, $matched) {
+
+    $content = $request->param('content', false);
+    if ($content === false) {
+        // if the content was empty (how did it match??) then return this without acknowledging that anything happened
+        return false;
+    }
+
+    // build a list of all valid static content
+    $foundFile = false;
+    foreach (glob(BASEDIR.'/../code/static/*') as $file) {
+        if ($file == BASEDIR.'/../code/static/' . $content) {
+            // we check like this becuase it prevents people from doing things like "/static/../../../../../../etc/passwd"
+            $foundFile = $file;
+            break;
+        }
+    }
+
+    if ($foundFile === false) {
+        // again, no such file, return empty so we eventually fall into the 404
+        return false;
+    }
+
+    // Now with the real file...
+
+    // taken from: http://css-tricks.com/snippets/php/intelligent-php-cache-control/ and modified to fit
+
+    // get the last-modified-date of this very file
+    $lastModified=filemtime($foundFile);
+
+    // get a unique hash of this file (etag)
+    $etagFile = md5_file($foundFile);
+
+    // get the HTTP_IF_MODIFIED_SINCE header if set
+    $ifModifiedSince = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? $_SERVER['HTTP_IF_MODIFIED_SINCE'] : false;
+
+    // get the HTTP_IF_NONE_MATCH header if set (etag: unique file hash)
+    $etagHeader = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH']) : false;
+
+    // set last-modified header
+    header("Last-Modified: " . gmdate("D, d M Y H:i:s", $lastModified) . " GMT");
+
+    // set etag-header
+    header("Etag: \"$etagFile\"");
+
+    // make sure caching is turned on
+    header('Cache-Control: public');
+
+    // check if page has changed. If not, send 304 and exit
+    if (($ifModifiedSince && @strtotime($ifModifiedSince)==$lastModified) || $etagHeader == $etagFile) {
+        header("HTTP/1.1 304 Not Modified");
+        exit;
+    }
+
+    // set the content type -- this is pretty ghetto, but using FileInfo isn't always supported
+    switch (pathinfo($foundFile, PATHINFO_EXTENSION)) {
+        case 'css': $ctype = 'text/css'; break;
+        case 'js' : $ctype = 'text/javascript'; break;
+           default: $ctype = 'text/plain'; break;
+    }
+    header('Content-type: ' . $ctype);
+
+    // dump the file out
+    // TODO: I could mimizie and cache the css/js dynamically here
+    readfile($foundFile, false);
+
+    return true;
+
+});
+
+
 respond('/auth/login', function (_Request $request, _Response $response, $app, $matched) {
 
     if (!defined('PASSWORD')) {

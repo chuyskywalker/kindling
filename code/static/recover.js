@@ -1,5 +1,6 @@
 /**
  * Recover Forms
+ * v0.1.0
  * Forms must have an ID, they are only recovered if the HREF matches, and only form elements with name attributes will be saved.
  */
 
