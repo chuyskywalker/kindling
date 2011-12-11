@@ -511,8 +511,8 @@ class _Response extends StdClass {
             $this->set($data);
         }
         if (defined('VIEWDIR') && defined('TEMPLATE')) {
-            $vt = VIEWDIR . '/'. TEMPLATE .'/' . ltrim($view,'/');
-            $vd = VIEWDIR . '/'. 'default'.'/' . ltrim($view,'/');
+            $vt = VIEWDIR . '/../../themes/'. TEMPLATE .'/' . ltrim($view,'/');
+            $vd = VIEWDIR . '/' . ltrim($view,'/');
             if (file_exists($vt)) {
                 $view = $vt;
             }
@@ -521,7 +521,7 @@ class _Response extends StdClass {
             }
         }
         elseif (defined('VIEWDIR')) {
-            $vt = VIEWDIR . '/default/'. ltrim($view, '/');
+            $vt = VIEWDIR . '/'. ltrim($view, '/');
             if (file_exists($vt)) {
                 $view = $vt;
             }
