@@ -1,4 +1,3 @@
-syntax: glob
 .idea/*
 config.php
 code/views/jrm/*
