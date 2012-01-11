@@ -315,7 +315,7 @@ respond('/feed/[(rss|rss2|atom):type]', function (_Request $request, _Response $
 
     // setup the basics
     $TestFeed = new FeedWriter($type);
-    $TestFeed->setTitle(defined('TITLE') ? TITLE : 'Tumblite');
+    $TestFeed->setTitle(defined('TITLE') ? TITLE : 'Kindling');
     $TestFeed->setLink($app->siteurl);
     $TestFeed->setDescription(defined('DESCRIPTION') ? DESCRIPTION : 'A blog by ' . (defined('AUTHOR') ? AUTHOR : 'Anonymous'));
 

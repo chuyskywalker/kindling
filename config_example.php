@@ -11,7 +11,7 @@
 //define('AUTHOR', 'Anonymous');
 
 // The title of your site
-//define('TITLE', 'Tumblite');
+//define('TITLE', 'Kindling');
 
 // If you build a custom set of views (code/views/<idhere>) then place that template folder name here
 // To build a template, simply make the folder, copy the file you want to change into it from default, and hack away
