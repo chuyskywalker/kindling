@@ -1,0 +1,29 @@
+!{float:right}https://github.com/chuyskywalker/kindling/raw/master/kindling.png!
+
+h1. Kindling
+
+Inspired by the content type simplicity of tumblr, but desireing my own self hosted solution, and unhappy with Wordpress/Drupal like overbearing solutions, I created Kindling.
+
+Kindling is simple blogging system that has a minimilistic admin, no-b.s. template overrides, and is backed by Redis making it insanely fast.
+
+
+h2. Setup
+
+I *HIGHLY* reccommend that you install the Kindling in your webserver like this:
+
+bc. + /var/www/site.com/
++-- config.php
++-- site/
+|   +-- uploads/
+|   +-- index.php
+|   +-- css/
+|   +-- js/
+|   +-- img/
++-- code/
++-- theme/
+
+The Kindling code should be placed inside the code folder. The @docroot@ for your virtual host should be pointed at the @/var/www/site.com/site@ folder. This ensures that the only PHP file in your docroot is @index.php@, while the remaining exposed files are all static files.
+
+After that, you must also have the @site/uploads/@ folder present so that you may upload images. (You will also likely need to set the permissions of that folder to allow upload -- Kindling will attempt to do this on its own, but may fail and ask you for help.)
+
+_Logo care of: http://www.clker.com/clipart-clean-fire.html_
