@@ -1,0 +1,44 @@
+<?php $this->render('_head.phtml') ?>
+
+<?php /* <h2><?= ucfirst($this->list) ?> items, page <?= $this->page ?></h2> */ ?>
+
+<?php
+
+if(isset($this->items) && count($this->items)) {
+    foreach ($this->items as $item) {
+        $this->render('item.phtml', array('item'=>$item));
+    }
+
+    // pagination!
+    $linkprefix = ($this->list == 'all' ? '/' : '/' . $this->list . '/');
+    $items = paginate($user_params=array(
+        'cur_page'        => $this->page,
+        'total_results'   => $this->total, // should be INT
+        'per_page'        => $this->perpage,
+        'format'          =>  '<a href="'. $linkprefix .'{P}">{Pt}</a>',
+    ));
+
+    if (count($items)) {
+        echo '<ul class="pagi"><li>'. implode('</li><li>', $items) .'</li></ul>';
+    }
+    
+}
+else {
+    // cant create and "ALL" item
+    if ($this->list == Item::REDIS_ALLPOSTS) {
+        $this->list = Item_post::TYPE;
+    }
+    echo '
+    <center>
+        <p>There are no '. $this->list .' items yet.</p>
+        <p>' . ( $this->hasAuth ?
+            '<a href="/edit/'. $this->list . '">Create a new '. ucfirst($this->list) . ' item</a>.'
+          : '<a href="/edit/'. $this->list . '">Login</a> to create new posts.'
+        ) . '</p>
+    </center>
+    ';
+}
+
+?>
+
+<?php $this->render('_footer.phtml') ?>

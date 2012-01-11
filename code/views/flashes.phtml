@@ -1,0 +1,23 @@
+<?php
+
+/** @var $this _Response */
+
+if (!$this->hasAuth) {
+    // non-authed users don't ever get flashes, so stop starting sessions for them.
+    return;
+}
+
+$flashes = $this->flashes();
+if ($flashes) {
+    echo '<div class="flashes">';
+
+    foreach ($flashes as $flashtype => $flashMsgs) {
+        foreach ($flashMsgs as $flashMsg) {
+            echo '<div class="flash flash-'.$flashtype.'">'. $flashMsg .'</div>';
+        }
+    }
+    
+    echo '</div>';
+}
+
+?>

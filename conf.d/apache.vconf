@@ -1,0 +1,55 @@
+<VirtualHost *:80>
+    ServerName jd.com
+    DocumentRoot "/pcwww/tumblite/site/"
+    DirectoryIndex index.html index.php
+
+    <Directory /pcwww/tumblite/site/>
+        <IfModule mod_rewrite.c>
+        RewriteEngine On
+        RewriteBase /
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteRule . /index.php [L]
+        </IfModule>
+    </Directory>
+
+#    <Location edit>
+#        SSLVerifyClient require
+#        SSLVerifyDepth 1
+#    </Location>
+
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName jd.com
+    DocumentRoot "/pcwww/tumblite/site/"
+    DirectoryIndex index.html index.php
+
+    SSLEngine on
+    SSLCertificateFile /etc/pki/tls/certs/localhost.crt
+    SSLCipherSuite ALL:!ADH:!EXPORT:!SSLv2:RC4+RSA:+HIGH:+MEDIUM:+LOW
+    SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
+    <Files ~ "\.(cgi|shtml|phtml|php3?)$">
+        SSLOptions +StdEnvVars
+    </Files>
+    SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
+    CustomLog logs/ssl_request_log "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \"%r\" %b"
+
+
+    <Directory /pcwww/tumblite/site/>
+        <IfModule mod_rewrite.c>
+        RewriteEngine On
+        RewriteBase /
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteRule . /index.php [L]
+        </IfModule>
+    </Directory>
+
+    <Location ~ edit>
+        SSLVerifyClient require
+        SSLCACertificateFile /etc/pki/tls/certs/ca-bundle.crt
+        SSLVerifyDepth 1
+    </Location>
+
+</VirtualHost>

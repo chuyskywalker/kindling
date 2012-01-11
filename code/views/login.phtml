@@ -1,0 +1,4 @@
+<form method="POST" action="/auth/login">
+    <p><label>Password: <input type="password" name="password" /></label> <input type="submit" value="Login" /></p>
+    <input type="hidden" name="return" value="<?= $this->escape($this->redirect) ?>" />
+</form>
