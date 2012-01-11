@@ -1,3 +1,5 @@
+<img src="kindling.png" style="float: right;" />
+
 Kindling
 ========
 
@@ -9,7 +11,7 @@ Kindling is simple blogging system that has a minimilistic admin, no-b.s. templa
 Setup
 -----
 
-I *HIGHLY* reccommend that you install the Kindling in your webserve like this:
+I *HIGHLY* reccommend that you install the Kindling in your webserver like this:
 
 ```
 + /var/www/site.com/
@@ -27,3 +29,5 @@ I *HIGHLY* reccommend that you install the Kindling in your webserve like this:
 The Kindling code should be placed inside the code folder. The "docroot" for your virtual host should be pointed at the "/var/www/site.com/site" folder. This ensures that the only PHP file in your docroot is index.php, while the remaining exposed files are all static files.
 
 After that, you must also have the "site/uploads/" folder present so that you may upload images.
+
+*Logo care of: http://www.clker.com/clipart-clean-fire.html*
