@@ -1,5 +1,5 @@
 <VirtualHost *:80>
-    ServerName jd.com
+    ServerName kindling.com
     DocumentRoot "/pcwww/kindling/site/"
     DirectoryIndex index.html index.php
 
@@ -21,7 +21,7 @@
 </VirtualHost>
 
 <VirtualHost *:443>
-    ServerName jd.com
+    ServerName kindling.com
     DocumentRoot "/pcwww/kindling/site/"
     DirectoryIndex index.html index.php
 
