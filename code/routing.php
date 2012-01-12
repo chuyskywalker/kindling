@@ -21,11 +21,11 @@ respond('*', function (_Request $request, _Response $response, $app) {
 
     // get the start/end of this blogs post history
     $allItems = rc::key(Item::REDIS_POST_INDEX, Item::REDIS_ALLPOSTS);
-    $firstItem = rc::get()->zRange($allItems, 0, 0, true);
-    $lastItem  = rc::get()->zRevRange($allItems, 0, 0, true);
+    $firstItem = rc::get()->zRange($allItems, 0, 0, 'WITHSCORES');
+    $lastItem  = rc::get()->zRevRange($allItems, 0, 0, 'WITHSCORES');
     if ($firstItem && $lastItem) {
-        $response->set('startdate', array_pop($firstItem));
-        $response->set('enddate', array_pop($lastItem));
+        $response->set('startdate', $firstItem[0][1]);
+        $response->set('enddate', $lastItem[0][1]);
     }
     else {
         $response->set('startdate', time());
