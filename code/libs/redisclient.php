@@ -7,17 +7,13 @@ class rc {
 
     const JOIN = ':';
 
-    /** @var Redis */
+    /* @var Predis\Client */
     static $redis;
 
     static function get() {
         if (!isset(self::$redis)) {
-            self::$redis = new Redis();
-            //self::$redis->connect(REDIS_HOST, 6379, 5);
-            $h = defined('REDIS_HOST') ? REDIS_HOST : 'localhost';
-            $p = defined('REDIS_PORT') ? REDIS_PORT : 6379;
-            $t = defined('REDIS_CONNECT_TIMEOUT') ? REDIS_CONNECT_TIMEOUT : 5;
-            self::$redis->connect($h, $p, $t);
+            $constring = defined('REDIS_CONNECTION_STRING') ? REDIS_CONNECTION_STRING : 'tcp://localhost:6379';
+            self::$redis = new Predis\Client($constring);
             if (defined('REDIS_DBID')) {
                 self::$redis->select(REDIS_DBID);
             }
