@@ -2,7 +2,10 @@
 
 $s = microtime(true);
 
-require __DIR__ . '/../config.php';
+$config = __DIR__ . '/../config.php';
+if (file_exists($config)) {
+    require $config;
+}
 
 define('VIEWDIR', __DIR__ . '/views');
 define('UPLOADDIR', BASEDIR . '/uploads');
