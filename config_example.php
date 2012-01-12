@@ -29,7 +29,5 @@
 //define('PASSWORD', 'YourHashHere');
 
 // Want to connect to redis in a way other than the default setup? Make changes here. Each is currently showing the default used
-//define('REDIS_HOST', 'localhost');
-//define('REDIS_PORT', 6379);
-//define('REDIS_CONNECT_TIMEOUT', 5);
+//define('REDIS_CONNECTION_STRING', 'tcp://localhost:6379');
 //define('REDIS_DBID', 0);
